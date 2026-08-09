@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Acquisition audit &mdash; Multi-location ABA provider</title>
+<style>
+:root{
+  --ink:#10151C; --paper:#FBFBF9; --panel:#FFFFFF;
+  --rule:#DDE1E6; --rule-soft:#ECEEF1; --muted:#5A6472;
+  --accent:#0F6E7D;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: ui-sans-serif, -apple-system, "Segoe UI Variable Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.62 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:78rem;margin:0 auto;padding:0 2rem 6rem}
+a{color:var(--accent)}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.mast{padding:4rem 0 2rem;border-bottom:3px solid var(--ink)}
+.eyebrow{font:600 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.4rem}
+h1{margin:0 0 .5rem;font-size:clamp(2.1rem,4.6vw,3.4rem);font-weight:760;letter-spacing:-.032em;line-height:1.02}
+.subject{font-size:1.05rem;color:var(--muted);margin:0 0 1.6rem}
+.origin{font-family:var(--mono);font-size:.85rem;color:var(--ink)}
+.standfirst{max-width:44rem;margin:0;font-size:1.02rem;color:var(--muted);border-left:2px solid var(--rule);padding-left:1.1rem}
+
+ul.scope{display:flex;flex-wrap:wrap;gap:0;margin:0;padding:0;list-style:none;border-bottom:1px solid var(--rule)}
+ul.scope li{flex:1 1 9rem;padding:1.25rem 1.25rem 1.25rem 0}
+ul.scope dt{font:600 10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+ul.scope dd{margin:0;font-size:1.6rem;font-weight:680;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+ul.scope dd small{display:block;font-size:.76rem;font-weight:400;color:var(--muted);letter-spacing:0;margin-top:.15rem}
+
+.matrix-sec{padding:3rem 0 0}
+h2.sec{font:600 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 .5rem}
+.sec-note{margin:0 0 1.5rem;color:var(--muted);font-size:.92rem;max-width:42rem}
+table.matrix{border-collapse:collapse;width:100%;max-width:46rem;font-variant-numeric:tabular-nums}
+table.matrix th{font:600 10px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:center;padding:.5rem .4rem}
+table.matrix th.row{text-align:left;width:9rem;padding-left:0}
+table.matrix td{text-align:center;padding:0;border:1px solid var(--rule-soft);height:3.1rem}
+table.matrix td .n{font-size:1.05rem;font-weight:680}
+table.matrix td.zero{color:#C3C8CE;background:#FCFCFB}
+table.matrix td.zero .n{font-weight:400}
+.axis-note{margin:.9rem 0 0;font-size:.8rem;color:var(--muted);max-width:42rem}
+
+.cols{display:grid;grid-template-columns:15rem 1fr;gap:3.5rem;margin-top:3.5rem;align-items:start}
+nav.index{position:sticky;top:2rem;font-size:.84rem}
+nav.index h3{font:600 10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 .8rem}
+nav.index ol{list-style:none;margin:0;padding:0}
+nav.index li{margin:0 0 .42rem;line-height:1.35}
+nav.index a{text-decoration:none;color:var(--ink);display:flex;gap:.5rem;align-items:baseline}
+nav.index a:hover{color:var(--accent)}
+nav.index .dot{width:6px;height:6px;border-radius:50%;flex:0 0 6px;margin-top:.42rem}
+
+.group{margin:0 0 3rem}
+.group-head{display:flex;align-items:baseline;gap:.75rem;border-bottom:2px solid var(--ink);padding-bottom:.5rem;margin-bottom:1.5rem}
+.group-head .label{font:700 13px/1 var(--mono);letter-spacing:.13em;text-transform:uppercase}
+.group-head .desc{font-size:.84rem;color:var(--muted)}
+.group-head .count{font:400 12px/1 var(--mono);color:var(--muted);margin-left:auto}
+
+article.finding{background:var(--panel);border:1px solid var(--rule);border-left-width:4px;padding:1.5rem 1.75rem;margin:0 0 1rem;scroll-margin-top:2rem}
+article.finding h3{margin:0 0 .7rem;font-size:1.16rem;font-weight:680;letter-spacing:-.014em;line-height:1.3}
+.tags{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:.85rem}
+.tag{font:600 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:.34rem .5rem;border:1px solid var(--rule);color:var(--muted)}
+.tag.sev{color:#fff;border-color:transparent}
+.tag.conf-high{border-color:#3F6B4F;color:#3F6B4F}
+.tag.conf-moderate{border-color:#8A6D1F;color:#8A6D1F}
+.tag.conf-low{border-color:var(--muted);color:var(--muted);font-style:italic}
+.detail{margin:0 0 1rem;color:#232A33}
+pre{font:400 12px/1.65 var(--mono);background:#F5F6F7;border:1px solid var(--rule-soft);border-left:2px solid var(--rule);padding:.85rem 1rem;overflow-x:auto;margin:0 0 1rem;white-space:pre-wrap;word-break:break-word;color:#2A313A}
+details{margin:0 0 1rem;border-top:1px solid var(--rule-soft);padding-top:.7rem}
+summary{cursor:pointer;font:600 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+summary:hover{color:var(--accent)}
+ul.urls{margin:.8rem 0 0;padding:0;list-style:none;font:400 12px/1.7 var(--mono);word-break:break-all}
+ul.urls li{padding-left:1rem;text-indent:-1rem;color:#3A424C}
+.rec{border-top:1px solid var(--rule);padding-top:.9rem}
+.rec b{font:600 10px/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:.4rem}
+.cap{margin-top:.75rem;margin-bottom:0;font-size:.78rem;color:var(--muted)}
+
+.limits{margin-top:4rem;border-top:3px solid var(--ink);padding-top:2rem}
+.limits h2{font-size:1.5rem;font-weight:720;letter-spacing:-.02em;margin:0 0 .8rem}
+.limits p,.limits ul{max-width:44rem;color:var(--muted)}
+.limits ul{padding-left:1.1rem}
+.limits li{margin-bottom:.35rem}
+footer.credit{margin-top:2.5rem;font:400 12px/1.6 var(--mono);color:var(--muted)}
+
+@media (max-width:64rem){
+  .cols{grid-template-columns:1fr;gap:2rem}
+  nav.index{position:static;border-bottom:1px solid var(--rule);padding-bottom:1rem}
+  .wrap{padding:0 1.25rem 4rem}
+}
+@media print{
+  body{background:#fff}
+  nav.index{display:none}
+  .cols{grid-template-columns:1fr}
+  article.finding{break-inside:avoid;border-color:#ccc}
+  details{display:none}
+  a{color:var(--ink);text-decoration:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Digital acquisition audit &middot; public data only</p>
+  <h1>Multi-location ABA provider</h1>
+  <p class="subject"><span class="origin">https://provider.example</span> &nbsp;&middot;&nbsp; generated 2026-08-09 23:01 UTC</p>
+  <p class="standfirst">Collected from pages any visitor can load, logged out. No account access, no
+  analytics, no advertising data. Every finding is reproducible by anyone who runs the same crawl, and
+  carries how sure the tool is about it.</p>
+</header>
+
+<ul class="scope">
+  <li><dt>Pages read</dt><dd>151<small>of 151 crawled</small></dd></li>
+  <li><dt>Sitemap URLs</dt><dd>149<small>robots.txt respected</small></dd></li>
+  <li><dt>Findings</dt><dd>24<small>20 actionable</small></dd></li>
+  <li><dt>Answer engines</dt><dd>&mdash;<small>module not run</small></dd></li>
+</ul>
+
+<section class="matrix-sec">
+  <h2 class="sec">Severity against confidence</h2>
+  <p class="sec-note">Severity is a judgement about revenue impact. Confidence is how far the evidence
+  actually supports it. Reading both together is the point: a critical finding at low confidence is a
+  question, not an instruction.</p>
+  <table class="matrix">
+    <tr><th class="row"></th><th>high confidence</th><th>moderate confidence</th><th>low confidence</th></tr>
+    <tr><th class="row" style="color:#A4243B">critical</th><td class="" style="background:#F7E9EC;box-shadow:inset 3px 0 0 #A4243B"><span class="n">1</span></td><td class="zero"><span class="n">&middot;</span></td><td class="zero"><span class="n">&middot;</span></td></tr>
+    <tr><th class="row" style="color:#B3541E">high</th><td class="" style="background:#FAEDE4;box-shadow:inset 3px 0 0 #B3541E"><span class="n">7</span></td><td class="zero"><span class="n">&middot;</span></td><td class="zero"><span class="n">&middot;</span></td></tr>
+    <tr><th class="row" style="color:#8A6D1F">medium</th><td class="" style="background:#F8F2E1;box-shadow:inset 3px 0 0 #8A6D1F"><span class="n">3</span></td><td class="" style="background:#F8F2E1;box-shadow:inset 3px 0 0 #8A6D1F"><span class="n">3</span></td><td class="" style="background:#F8F2E1;box-shadow:inset 3px 0 0 #8A6D1F"><span class="n">1</span></td></tr>
+    <tr><th class="row" style="color:#3F6B4F">low</th><td class="" style="background:#EAF1EC;box-shadow:inset 3px 0 0 #3F6B4F"><span class="n">5</span></td><td class="zero"><span class="n">&middot;</span></td><td class="zero"><span class="n">&middot;</span></td></tr>
+    <tr><th class="row" style="color:#5A6472">info</th><td class="" style="background:#EFF1F4;box-shadow:inset 3px 0 0 #5A6472"><span class="n">1</span></td><td class="" style="background:#EFF1F4;box-shadow:inset 3px 0 0 #5A6472"><span class="n">2</span></td><td class="" style="background:#EFF1F4;box-shadow:inset 3px 0 0 #5A6472"><span class="n">1</span></td></tr>
+  </table>
+  <p class="axis-note">Confidence drops where the evidence is indirect. A tag inventory built from
+  server-rendered markup cannot see what a tag manager injects at runtime, so it is a floor rather than
+  a census, and it says so.</p>
+</section>
+
+<div class="cols">
+  <nav class="index" aria-label="Findings index">
+    <h3>Findings</h3>
+    <ol>
+      <li><a href="#local-stacked-clinics"><span class="dot" style="background:#A4243B"></span><span>4 URLs hosting more than one clinic, leaving roughly 7 clinics with no page of their own</span></a></li>
+      <li><a href="#seo-dup-title-accepted-insurance-aba-therapy-insurance-coverag"><span class="dot" style="background:#B3541E"></span><span>2 pages sharing the title &quot;Accepted Insurance | ABA Therapy Insurance Coverage in Texas&quot;</span></a></li>
+      <li><a href="#seo-dup-title-thank-you-redacted-behavioral-health"><span class="dot" style="background:#B3541E"></span><span>2 pages sharing the title &quot;Thank You - redacted Behavioral Health&quot;</span></a></li>
+      <li><a href="#seo-dup-title-aba-therapy-clinics-in-texas-redacted-behavioral"><span class="dot" style="background:#B3541E"></span><span>2 pages sharing the title &quot;ABA Therapy Clinics in Texas | redacted Behavioral Health Lo…&quot;</span></a></li>
+      <li><a href="#seo-dup-title-aba-therapy-for-children-with-autism-redacted-bh"><span class="dot" style="background:#B3541E"></span><span>2 pages sharing the title &quot;ABA Therapy for Children with Autism | redacted BH&quot;</span></a></li>
+      <li><a href="#seo-dup-title-aba-therapy-for-autism-in-san-antonio-tx-redacted"><span class="dot" style="background:#B3541E"></span><span>2 pages sharing the title &quot;ABA Therapy for Autism in San Antonio, TX | redacted BH&quot;</span></a></li>
+      <li><a href="#seo-dup-title-aba-therapy-for-autism-in-kyle-tx-redacted-bh"><span class="dot" style="background:#B3541E"></span><span>2 pages sharing the title &quot;ABA Therapy for Autism in Kyle, TX | redacted BH&quot;</span></a></li>
+      <li><a href="#seo-staging-leak-redactedstg-wpengine-com"><span class="dot" style="background:#B3541E"></span><span>Production pages reference the non-production host redactedstg.wpengine.com</span></a></li>
+      <li><a href="#seo-desc-missing"><span class="dot" style="background:#8A6D1F"></span><span>6 pages without a meta description</span></a></li>
+      <li><a href="#seo-h1-missing"><span class="dot" style="background:#8A6D1F"></span><span>7 pages without an H1</span></a></li>
+      <li><a href="#seo-thin-content"><span class="dot" style="background:#8A6D1F"></span><span>1 page under 300 words of body copy</span></a></li>
+      <li><a href="#seo-img-alt"><span class="dot" style="background:#8A6D1F"></span><span>328 images without an alt attribute</span></a></li>
+      <li><a href="#local-possible-stacked-clinics"><span class="dot" style="background:#8A6D1F"></span><span>1 location page may host more than one clinic, needs a manual check</span></a></li>
+      <li><a href="#local-shared-phone"><span class="dot" style="background:#8A6D1F"></span><span>2 phone numbers appearing across three or more location pages</span></a></li>
+      <li><a href="#content-gap-uncovered"><span class="dot" style="background:#8A6D1F"></span><span>10 of 36 family-intent questions have no page that addresses them</span></a></li>
+      <li><a href="#seo-title-long"><span class="dot" style="background:#3F6B4F"></span><span>15 titles over 65 characters</span></a></li>
+      <li><a href="#seo-h1-multiple"><span class="dot" style="background:#3F6B4F"></span><span>1 page with more than one H1</span></a></li>
+      <li><a href="#seo-img-unencoded"><span class="dot" style="background:#3F6B4F"></span><span>274 image URLs containing unencoded spaces or brackets</span></a></li>
+      <li><a href="#seo-internal-redirects"><span class="dot" style="background:#3F6B4F"></span><span>4 internal links resolving through a redirect</span></a></li>
+      <li><a href="#seo-og-image-small"><span class="dot" style="background:#3F6B4F"></span><span>Open Graph image is below the size social platforms render large</span></a></li>
+      <li><a href="#tag-inventory"><span class="dot" style="background:#5A6472"></span><span>1 tracking platform detected in markup</span></a></li>
+      <li><a href="#tag-gtm-no-ga4"><span class="dot" style="background:#5A6472"></span><span>Google Tag Manager found, GA4 measurement ID not visible in markup</span></a></li>
+      <li><a href="#tag-conversion-surfaces"><span class="dot" style="background:#5A6472"></span><span>4 pages carrying a lead form</span></a></li>
+      <li><a href="#content-gap-covered"><span class="dot" style="background:#5A6472"></span><span>26 questions with a plausible matching page</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section class="group">
+  <div class="group-head">
+    <span class="label" style="color:#A4243B">critical</span>
+    <span class="desc">Blocks acquisition or creates regulatory exposure</span>
+    <span class="count">1</span>
+  </div>
+  <article class="finding" id="local-stacked-clinics" style="border-left-color:#A4243B">
+    <div class="tags">
+      <span class="tag sev" style="background:#A4243B">critical</span>
+      <span class="tag">local</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>4 URLs hosting more than one clinic, leaving roughly 7 clinics with no page of their own</h3>
+    <p class="detail">Each clinic appears as an anchor fragment on a shared page. A Google Business Profile landing page must be a distinct URL: a fragment does not qualify, so every clinic after the first on a shared page has no page to point its profile at, cannot rank for its own neighbourhood query, and cannot be measured separately in analytics or paid landing-page reporting.</p>
+    <pre>https://provider.example/location/san-antonio-tx/ - 3 clinics: northwest_san_antonio_aba_clinic, far_west_san_antonio_aba_clinic, stone_oak_aba_clinic
+https://provider.example/location/mcallen-tx/ - 2 clinics: mcallen_north_aba_clinic, mcallen_south_aba_clinic
+https://provider.example/location/corpus-christi-tx/ - 2 clinics: corpus_christi_central_aba_clinic, corpus_christi_south_aba_clinic
+https://provider.example/location/el-paso-tx/ - 4 clinics: el_paso_far_east_aba_clinic, el_paso_central_aba_clinic, el_paso_west_aba_clinic_, el_paso_east_aba_clinic</pre>
+    <details><summary>4 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/location/san-antonio-tx/</li><li>https://provider.example/location/mcallen-tx/</li><li>https://provider.example/location/corpus-christi-tx/</li><li>https://provider.example/location/el-paso-tx/</li></ul></details>
+    <div class="rec"><b>What to do</b>Split each clinic onto its own indexable URL with unique title, address, phone, hours, staff, and LocalBusiness schema. Then repoint the matching Business Profile to it. Do the highest-volume markets first.</div>
+    <p class="cap">Capability: Manage local listing accuracy across all clinic locations, treating Google Business Profile and other directories as lead generation assets</p>
+  </article>
+</section>
+<section class="group">
+  <div class="group-head">
+    <span class="label" style="color:#B3541E">high</span>
+    <span class="desc">Measurably suppresses qualified traffic or conversion</span>
+    <span class="count">7</span>
+  </div>
+  <article class="finding" id="seo-dup-title-accepted-insurance-aba-therapy-insurance-coverag" style="border-left-color:#B3541E">
+    <div class="tags">
+      <span class="tag sev" style="background:#B3541E">high</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>2 pages sharing the title &quot;Accepted Insurance | ABA Therapy Insurance Coverage in Texas&quot;</h3>
+    <p class="detail">Duplicate titles across pages compete for the same queries and give searchers no way to tell the results apart.</p>
+    <pre>Accepted Insurance | ABA Therapy Insurance Coverage in Texas</pre>
+    <details><summary>2 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/insurance/</li><li>https://provider.example/insurance/</li></ul></details>
+    <div class="rec"><b>What to do</b>Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="seo-dup-title-thank-you-redacted-behavioral-health" style="border-left-color:#B3541E">
+    <div class="tags">
+      <span class="tag sev" style="background:#B3541E">high</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>2 pages sharing the title &quot;Thank You - redacted Behavioral Health&quot;</h3>
+    <p class="detail">Duplicate titles across pages compete for the same queries and give searchers no way to tell the results apart.</p>
+    <pre>Thank You - redacted Behavioral Health</pre>
+    <details><summary>2 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/thank-you/</li><li>https://provider.example/thank-you-pa/</li></ul></details>
+    <div class="rec"><b>What to do</b>Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="seo-dup-title-aba-therapy-clinics-in-texas-redacted-behavioral" style="border-left-color:#B3541E">
+    <div class="tags">
+      <span class="tag sev" style="background:#B3541E">high</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>2 pages sharing the title &quot;ABA Therapy Clinics in Texas | redacted Behavioral Health Lo…&quot;</h3>
+    <p class="detail">Duplicate titles across pages compete for the same queries and give searchers no way to tell the results apart.</p>
+    <pre>ABA Therapy Clinics in Texas | redacted Behavioral Health Locations</pre>
+    <details><summary>2 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/locations/</li><li>https://provider.example/locations-draft/</li></ul></details>
+    <div class="rec"><b>What to do</b>Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="seo-dup-title-aba-therapy-for-children-with-autism-redacted-bh" style="border-left-color:#B3541E">
+    <div class="tags">
+      <span class="tag sev" style="background:#B3541E">high</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>2 pages sharing the title &quot;ABA Therapy for Children with Autism | redacted BH&quot;</h3>
+    <p class="detail">Duplicate titles across pages compete for the same queries and give searchers no way to tell the results apart.</p>
+    <pre>ABA Therapy for Children with Autism | redacted BH</pre>
+    <details><summary>2 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/service/aba-services/</li><li>https://provider.example/service/aba-services/</li></ul></details>
+    <div class="rec"><b>What to do</b>Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="seo-dup-title-aba-therapy-for-autism-in-san-antonio-tx-redacted" style="border-left-color:#B3541E">
+    <div class="tags">
+      <span class="tag sev" style="background:#B3541E">high</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>2 pages sharing the title &quot;ABA Therapy for Autism in San Antonio, TX | redacted BH&quot;</h3>
+    <p class="detail">Duplicate titles across pages compete for the same queries and give searchers no way to tell the results apart.</p>
+    <pre>ABA Therapy for Autism in San Antonio, TX | redacted BH</pre>
+    <details><summary>2 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/location/san-antonio-tx/</li><li>https://provider.example/location/san-antonio-tx/</li></ul></details>
+    <div class="rec"><b>What to do</b>Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="seo-dup-title-aba-therapy-for-autism-in-kyle-tx-redacted-bh" style="border-left-color:#B3541E">
+    <div class="tags">
+      <span class="tag sev" style="background:#B3541E">high</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>2 pages sharing the title &quot;ABA Therapy for Autism in Kyle, TX | redacted BH&quot;</h3>
+    <p class="detail">Duplicate titles across pages compete for the same queries and give searchers no way to tell the results apart.</p>
+    <pre>ABA Therapy for Autism in Kyle, TX | redacted BH</pre>
+    <details><summary>2 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/location/kyle/</li><li>https://provider.example/location/kyle/</li></ul></details>
+    <div class="rec"><b>What to do</b>Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="seo-staging-leak-redactedstg-wpengine-com" style="border-left-color:#B3541E">
+    <div class="tags">
+      <span class="tag sev" style="background:#B3541E">high</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>Production pages reference the non-production host redactedstg.wpengine.com</h3>
+    <p class="detail">Hard-coded staging URLs in live markup leak internal infrastructure, can serve stale assets, and occasionally get the staging environment crawled and indexed alongside production.</p>
+    <pre>redactedstg.wpengine.com</pre>
+    <details><summary>2 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/partner-agencies/</li><li>https://provider.example/service/full-time-aba-day-program/</li></ul></details>
+    <div class="rec"><b>What to do</b>Replace absolute staging URLs with relative or production-absolute paths, and confirm the staging environment returns noindex plus HTTP auth.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+</section>
+<section class="group">
+  <div class="group-head">
+    <span class="label" style="color:#8A6D1F">medium</span>
+    <span class="desc">Degrades performance, fix in the normal cycle</span>
+    <span class="count">7</span>
+  </div>
+  <article class="finding" id="seo-desc-missing" style="border-left-color:#8A6D1F">
+    <div class="tags">
+      <span class="tag sev" style="background:#8A6D1F">medium</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>6 pages without a meta description</h3>
+    <p class="detail">Search engines generate a snippet from body text instead, which is rarely the sentence that converts.</p>
+    
+    <details><summary>6 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/thank-you/</li><li>https://provider.example/thank-you-pa/</li><li>https://provider.example/notice-of-hipaa-privacy-breach/</li><li>https://provider.example/referral-form-copy/</li><li>https://provider.example/sdk-snippet/</li><li>https://provider.example/parent-resources/</li></ul></details>
+    <div class="rec"><b>What to do</b>Write a description per page ending in the action you want a parent to take.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="seo-h1-missing" style="border-left-color:#8A6D1F">
+    <div class="tags">
+      <span class="tag sev" style="background:#8A6D1F">medium</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>7 pages without an H1</h3>
+    <p class="detail">The H1 states the page topic for both readers and crawlers.</p>
+    
+    <details><summary>7 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/search-locations/</li><li>https://provider.example/thank-you/</li><li>https://provider.example/thank-you-pa/</li><li>https://provider.example/notice-of-hipaa-privacy-breach/</li><li>https://provider.example/sdk-snippet/</li><li>https://provider.example/locations/</li><li>https://provider.example/faq/</li></ul></details>
+    <div class="rec"><b>What to do</b>Add a single H1 that names the service and the market.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="seo-thin-content" style="border-left-color:#8A6D1F">
+    <div class="tags">
+      <span class="tag sev" style="background:#8A6D1F">medium</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-moderate">moderate confidence</span>
+    </div>
+    <h3>1 page under 300 words of body copy</h3>
+    <p class="detail">Thin pages rarely rank for competitive terms and give answer engines nothing to quote.</p>
+    <pre>https://provider.example/parent-resources/ - 288 words</pre>
+    <details><summary>1 affected URL</summary>
+    <ul class="urls"><li>https://provider.example/parent-resources/</li></ul></details>
+    <div class="rec"><b>What to do</b>Expand each page to answer the questions a visitor actually arrives with. Thin pages are also the ones answer engines skip, because there is no substantive passage to quote.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="seo-img-alt" style="border-left-color:#8A6D1F">
+    <div class="tags">
+      <span class="tag sev" style="background:#8A6D1F">medium</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>328 images without an alt attribute</h3>
+    <p class="detail">Missing alt text is both an accessibility defect under WCAG 1.1.1 and lost image-search context. For a provider serving families with disabilities, the accessibility side is the larger exposure.</p>
+    
+    <details><summary>147 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/</li><li>https://provider.example/search-locations/</li><li>https://provider.example/get-started/</li><li>https://provider.example/insurance/</li><li>https://provider.example/blog/</li><li>https://provider.example/blog/how-to-teach-emotional-regulation-in-autism/</li><li>https://provider.example/blog/teaching-kids-with-autism-to-tell-and-understand-jokes/</li><li>https://provider.example/blog/autism-and-electronic-devices/</li><li>https://provider.example/blog/occupational-therapy-vs-aba-therapy/</li><li>https://provider.example/blog/autism-awareness-month/</li><li>https://provider.example/blog/common-cooccurring-disorders-with-autism/</li><li>https://provider.example/blog/what-are-neurodevelopmental-disorders/</li><li>https://provider.example/blog/aba-therapy-for-aggressive-behavior/</li><li>https://provider.example/blog/what-to-look-for-in-an-aba-therapy-center/</li><li>https://provider.example/blog/how-early-can-you-test-for-autism/</li><li>https://provider.example/blog/activities-for-kids-with-autism-during-the-holidays/</li><li>https://provider.example/blog/tips-for-autism-and-the-holidays/</li><li>https://provider.example/blog/what-is-behavior-skills-training-in-aba-therapy/</li><li>https://provider.example/blog/the-goals-of-aba-therapy-for-teens/</li><li>https://provider.example/blog/how-does-applied-behavior-analysis-utilize-positive-reinforcement/</li><li>https://provider.example/blog/how-does-autism-differ-in-males-and-females/</li><li>https://provider.example/blog/how-aba-enhances-communication-in-children/</li><li>https://provider.example/blog/what-is-discrete-trial-training-in-aba-therapy/</li><li>https://provider.example/blog/fall-activities-for-kids-with-autism/</li><li>https://provider.example/blog/aba-therapy-techniques-for-parents/</li><li>https://provider.example/blog/how-to-prepare-for-an-autism-evaluation/</li><li>https://provider.example/blog/aba-therapy-for-school-readiness/</li><li>https://provider.example/blog/summer-activities-for-autism/</li><li>https://provider.example/blog/aba-therapy-techniques-for-autism/</li><li>https://provider.example/blog/what-are-the-4-main-tests-for-autism/</li><li>https://provider.example/blog/autism-and-dealing-with-change/</li><li>https://provider.example/blog/thanksgiving-activities-for-autism/</li><li>https://provider.example/blog/how-parents-can-support-aba-therapy-from-home/</li><li>https://provider.example/blog/how-to-prepare-for-an-aba-therapy-interview/</li><li>https://provider.example/blog/top-5-reasons-to-work-with-children-with-autism/</li><li>https://provider.example/blog/steps-to-take-after-an-aba-therapist-certification/</li><li>https://provider.example/blog/exploring-the-aba-therapist-career-path/</li><li>https://provider.example/blog/autism-goals-for-the-new-year/</li><li>https://provider.example/blog/reducing-anxiety-in-individuals-with-autism/</li><li>https://provider.example/blog/autism-acceptance-month/</li><li>&hellip; 107 more</li></ul></details>
+    <div class="rec"><b>What to do</b>Add descriptive alt text to content images and alt=&quot;&quot; to decorative ones. The empty string is a deliberate signal; a missing attribute is not.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="local-possible-stacked-clinics" style="border-left-color:#8A6D1F">
+    <div class="tags">
+      <span class="tag sev" style="background:#8A6D1F">medium</span>
+      <span class="tag">local</span>
+      <span class="tag conf-low">low confidence</span>
+    </div>
+    <h3>1 location page may host more than one clinic, needs a manual check</h3>
+    <p class="detail">These pages carry several parseable street addresses but no clinic anchor to confirm the structure. Address parsing also matches corporate footers and suite numbers, so the count below is a prompt to look, not a measurement.</p>
+    <pre>https://provider.example/location/new-braunfels-tx/ - addresses parsed: 457 Landa St. Suite I New Braunfels, TX 78130 | 2115 Stephens Pl. Suite #810 New Braunfels, TX 78130 | 6222 I-10 Suite #104 San Antonio, TX 78201</pre>
+    <details><summary>1 affected URL</summary>
+    <ul class="urls"><li>https://provider.example/location/new-braunfels-tx/</li></ul></details>
+    <div class="rec"><b>What to do</b>Open each page and confirm how many clinics it serves. If more than one, it belongs with the critical finding above.</div>
+    <p class="cap">Capability: Manage local listing accuracy across all clinic locations, treating Google Business Profile and other directories as lead generation assets</p>
+  </article>
+  <article class="finding" id="local-shared-phone" style="border-left-color:#8A6D1F">
+    <div class="tags">
+      <span class="tag sev" style="background:#8A6D1F">medium</span>
+      <span class="tag">local</span>
+      <span class="tag conf-moderate">moderate confidence</span>
+    </div>
+    <h3>2 phone numbers appearing across three or more location pages</h3>
+    <p class="detail">A single central intake number is a reasonable operational choice, but it removes per-clinic call attribution and weakens the NAP signal for each individual profile.</p>
+    <pre>(210) 346-8696 on 22 pages
+(210) 579-7100 on 22 pages</pre>
+    <details><summary>30 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/location/harkerheights-tx/</li><li>https://provider.example/location/san-antonio-tx/</li><li>https://provider.example/location/missouri-city/</li><li>https://provider.example/location/kingwood-tx/</li><li>https://provider.example/location/mcallen-tx/</li><li>https://provider.example/location/san-angelo-tx/</li><li>https://provider.example/location/spring/</li><li>https://provider.example/location/humble-tx/</li><li>https://provider.example/location/new-braunfels-tx/</li><li>https://provider.example/location/the-woodlands/</li><li>https://provider.example/location/corpus-christi-tx/</li><li>https://provider.example/location/schertz-tx/</li><li>https://provider.example/location/brazos-valley-tx/</li><li>https://provider.example/location/waco-tx/</li><li>https://provider.example/location/edinburg-tx/</li><li>https://provider.example/location/brownsville/</li><li>https://provider.example/location/mission/</li><li>https://provider.example/location/victoria/</li><li>https://provider.example/location/harlingen-tx/</li><li>https://provider.example/location/laredo/</li><li>https://provider.example/location/el-paso-tx/</li><li>https://provider.example/location/kyle/</li><li>https://provider.example/location/harkerheights-tx/</li><li>https://provider.example/location/san-antonio-tx/</li><li>https://provider.example/location/missouri-city/</li><li>https://provider.example/location/kingwood-tx/</li><li>https://provider.example/location/mcallen-tx/</li><li>https://provider.example/location/san-angelo-tx/</li><li>https://provider.example/location/spring/</li><li>https://provider.example/location/humble-tx/</li></ul></details>
+    <div class="rec"><b>What to do</b>Keep central intake, but add per-clinic tracking numbers with call-tracking that preserves the real number in the Business Profile, so calls can be attributed to clinic and channel without breaking NAP.</div>
+    <p class="cap">Capability: Manage local listing accuracy across all clinic locations, treating Google Business Profile and other directories as lead generation assets</p>
+  </article>
+  <article class="finding" id="content-gap-uncovered" style="border-left-color:#8A6D1F">
+    <div class="tags">
+      <span class="tag sev" style="background:#8A6D1F">medium</span>
+      <span class="tag">content-gap</span>
+      <span class="tag conf-moderate">moderate confidence</span>
+    </div>
+    <h3>10 of 36 family-intent questions have no page that addresses them</h3>
+    <p class="detail">By funnel stage: awareness 2, consideration 4, decision 3, local 1. These are questions a parent types before they know which provider to call. A page that answers the question is what an answer engine quotes and what an informational search result ranks.</p>
+    <pre>Who diagnoses autism in children and how long does the wait take?
+Is ABA therapy controversial? What do autistic adults say about it?
+Center based vs in home ABA therapy, which is better for a young child?
+Does Texas Medicaid cover ABA therapy for children with autism?
+Does TRICARE cover ABA therapy for military families with an autistic child?
+How long is the waitlist for ABA therapy in Texas?
+Which ABA clinics in Texas accept TRICARE?
+ABA therapy centers that accept Blue Cross Blue Shield in Texas
+What should I bring to my child's first ABA assessment?
+ABA therapy centers in The Woodlands and Spring Texas</pre>
+    
+    <div class="rec"><b>What to do</b>Publish one page per uncovered question, written to be quoted: the answer in the first 60 words, then the detail. Prioritise decision-stage and local-stage gaps first, since those sit closest to an intake call.</div>
+    <p class="cap">Capability: Content direction to drive qualified traffic; AEO readiness</p>
+  </article>
+</section>
+<section class="group">
+  <div class="group-head">
+    <span class="label" style="color:#3F6B4F">low</span>
+    <span class="desc">Hygiene</span>
+    <span class="count">5</span>
+  </div>
+  <article class="finding" id="seo-title-long" style="border-left-color:#3F6B4F">
+    <div class="tags">
+      <span class="tag sev" style="background:#3F6B4F">low</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>15 titles over 65 characters</h3>
+    <p class="detail">Longer titles are truncated in results, so the closing words are not seen.</p>
+    
+    <details><summary>15 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/blog/redacted-spectacular-kids-partnership-missouri-city/</li><li>https://provider.example/locations/</li><li>https://provider.example/locations-draft/</li><li>https://provider.example/central-el-paso-draft/</li><li>https://provider.example/west-el-paso-draft/</li><li>https://provider.example/east-el-paso-draft/</li><li>https://provider.example/far-east-el-paso-draft/</li><li>https://provider.example/parent-resources/autism-resources-for-families-in-houston/</li><li>https://provider.example/parent-resources/autism-resources-for-families-in-dallas-fort-worth/</li><li>https://provider.example/parent-resources/autism-resources-for-families-in-el-paso/</li><li>https://provider.example/parent-resources/autism-resources-for-families-in-west-texas/</li><li>https://provider.example/parent-resources/autism-resources-for-families-in-rio-grande-valley/</li><li>https://provider.example/parent-resources/autism-resources-for-families-in-san-antonio/</li><li>https://provider.example/parent-resources/autism-resources-for-families-in-corpus-christi/</li><li>https://provider.example/parent-resources/autism-resources-for-families-in-central-texas/</li></ul></details>
+    <div class="rec"><b>What to do</b>Front-load the distinguishing terms; keep titles near 60 characters.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="seo-h1-multiple" style="border-left-color:#3F6B4F">
+    <div class="tags">
+      <span class="tag sev" style="background:#3F6B4F">low</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>1 page with more than one H1</h3>
+    <p class="detail">Multiple H1s dilute the topical signal, usually a theme or page-builder artefact.</p>
+    
+    <details><summary>1 affected URL</summary>
+    <ul class="urls"><li>https://provider.example/partner-agencies/</li></ul></details>
+    <div class="rec"><b>What to do</b>Demote secondary H1s to H2.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="seo-img-unencoded" style="border-left-color:#3F6B4F">
+    <div class="tags">
+      <span class="tag sev" style="background:#3F6B4F">low</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>274 image URLs containing unencoded spaces or brackets</h3>
+    <p class="detail">Spaces and square brackets in file paths are encoded inconsistently across clients and CDNs, which produces intermittent broken images.</p>
+    <pre>https://provider.example/wp-content/themes/twentytwentyone-child/assets/images/BONNET [L].png
+https://provider.example/wp-content/themes/twentytwentyone-child/assets/images/BONNET [L].png
+https://provider.example/wp-content/themes/twentytwentyone-child/assets/images/Icon feather-chevron-right.png
+https://provider.example/wp-content/themes/twentytwentyone-child/assets/images/Icon feather-chevron-right.png
+https://provider.example/wp-content/themes/twentytwentyone-child/assets/images/PPF [R].png</pre>
+    <details><summary>147 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/</li><li>https://provider.example/search-locations/</li><li>https://provider.example/get-started/</li><li>https://provider.example/insurance/</li><li>https://provider.example/blog/</li><li>https://provider.example/blog/how-to-teach-emotional-regulation-in-autism/</li><li>https://provider.example/blog/teaching-kids-with-autism-to-tell-and-understand-jokes/</li><li>https://provider.example/blog/autism-and-electronic-devices/</li><li>https://provider.example/blog/occupational-therapy-vs-aba-therapy/</li><li>https://provider.example/blog/autism-awareness-month/</li><li>https://provider.example/blog/common-cooccurring-disorders-with-autism/</li><li>https://provider.example/blog/what-are-neurodevelopmental-disorders/</li><li>https://provider.example/blog/aba-therapy-for-aggressive-behavior/</li><li>https://provider.example/blog/what-to-look-for-in-an-aba-therapy-center/</li><li>https://provider.example/blog/how-early-can-you-test-for-autism/</li><li>https://provider.example/blog/activities-for-kids-with-autism-during-the-holidays/</li><li>https://provider.example/blog/tips-for-autism-and-the-holidays/</li><li>https://provider.example/blog/what-is-behavior-skills-training-in-aba-therapy/</li><li>https://provider.example/blog/the-goals-of-aba-therapy-for-teens/</li><li>https://provider.example/blog/how-does-applied-behavior-analysis-utilize-positive-reinforcement/</li><li>https://provider.example/blog/how-does-autism-differ-in-males-and-females/</li><li>https://provider.example/blog/how-aba-enhances-communication-in-children/</li><li>https://provider.example/blog/what-is-discrete-trial-training-in-aba-therapy/</li><li>https://provider.example/blog/fall-activities-for-kids-with-autism/</li><li>https://provider.example/blog/aba-therapy-techniques-for-parents/</li><li>https://provider.example/blog/how-to-prepare-for-an-autism-evaluation/</li><li>https://provider.example/blog/aba-therapy-for-school-readiness/</li><li>https://provider.example/blog/summer-activities-for-autism/</li><li>https://provider.example/blog/aba-therapy-techniques-for-autism/</li><li>https://provider.example/blog/what-are-the-4-main-tests-for-autism/</li><li>https://provider.example/blog/autism-and-dealing-with-change/</li><li>https://provider.example/blog/thanksgiving-activities-for-autism/</li><li>https://provider.example/blog/how-parents-can-support-aba-therapy-from-home/</li><li>https://provider.example/blog/how-to-prepare-for-an-aba-therapy-interview/</li><li>https://provider.example/blog/top-5-reasons-to-work-with-children-with-autism/</li><li>https://provider.example/blog/steps-to-take-after-an-aba-therapist-certification/</li><li>https://provider.example/blog/exploring-the-aba-therapist-career-path/</li><li>https://provider.example/blog/autism-goals-for-the-new-year/</li><li>https://provider.example/blog/reducing-anxiety-in-individuals-with-autism/</li><li>https://provider.example/blog/autism-acceptance-month/</li><li>&hellip; 107 more</li></ul></details>
+    <div class="rec"><b>What to do</b>Rename assets to lowercase hyphenated filenames and update references.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="seo-internal-redirects" style="border-left-color:#3F6B4F">
+    <div class="tags">
+      <span class="tag sev" style="background:#3F6B4F">low</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>4 internal links resolving through a redirect</h3>
+    <p class="detail">Each hop costs latency and slightly dilutes link signals.</p>
+    <pre>https://provider.example/blog/does-insurance-cover-autism-evaluations/ -&gt; https://provider.example/insurance/
+https://provider.example/location/nw-san-antonio-tx/ -&gt; https://provider.example/location/san-antonio-tx/
+https://provider.example/location/kyle-tx/ -&gt; https://provider.example/location/kyle/
+https://provider.example/service/diagnostic-services/ -&gt; https://provider.example/service/aba-services/</pre>
+    <details><summary>4 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/blog/does-insurance-cover-autism-evaluations/</li><li>https://provider.example/location/nw-san-antonio-tx/</li><li>https://provider.example/location/kyle-tx/</li><li>https://provider.example/service/diagnostic-services/</li></ul></details>
+    <div class="rec"><b>What to do</b>Point internal links at final URLs.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+  <article class="finding" id="seo-og-image-small" style="border-left-color:#3F6B4F">
+    <div class="tags">
+      <span class="tag sev" style="background:#3F6B4F">low</span>
+      <span class="tag">technical-seo</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>Open Graph image is below the size social platforms render large</h3>
+    <p class="detail">og:image is declared at 250x250. Facebook and LinkedIn fall back to a small thumbnail below roughly 600x315, which measurably reduces click-through on shared and paid social links.</p>
+    <pre>https://provider.example/wp-content/uploads/2022/07/redacted-redacted-Health-Logo.png</pre>
+    <details><summary>53 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/</li><li>https://provider.example/search-locations/</li><li>https://provider.example/get-started/</li><li>https://provider.example/insurance/</li><li>https://provider.example/insurance/</li><li>https://provider.example/thank-you/</li><li>https://provider.example/thank-you-pa/</li><li>https://provider.example/notice-of-hipaa-privacy-breach/</li><li>https://provider.example/referral-form-copy/</li><li>https://provider.example/contact/</li><li>https://provider.example/partner-agencies/</li><li>https://provider.example/resources/</li><li>https://provider.example/terms-and-conditions/</li><li>https://provider.example/sdk-snippet/</li><li>https://provider.example/referral-form/</li><li>https://provider.example/transparency-in-coverage/</li><li>https://provider.example/privacy-policy/</li><li>https://provider.example/career/</li><li>https://provider.example/locations/</li><li>https://provider.example/about-us/</li><li>https://provider.example/locations-draft/</li><li>https://provider.example/faq/</li><li>https://provider.example/east-el-paso-draft/</li><li>https://provider.example/service/part-time-focused-aba-therapy/</li><li>https://provider.example/partner-agencies/including-kids/</li><li>https://provider.example/partner-agencies/the-grove/</li><li>https://provider.example/partner-agencies/spectacular-kids/</li><li>https://provider.example/location/harkerheights-tx/</li><li>https://provider.example/location/san-antonio-tx/</li><li>https://provider.example/location/missouri-city/</li><li>https://provider.example/location/kingwood-tx/</li><li>https://provider.example/location/mcallen-tx/</li><li>https://provider.example/location/san-angelo-tx/</li><li>https://provider.example/location/spring/</li><li>https://provider.example/location/humble-tx/</li><li>https://provider.example/location/new-braunfels-tx/</li><li>https://provider.example/location/corpus-christi-tx/</li><li>https://provider.example/location/schertz-tx/</li><li>https://provider.example/location/brazos-valley-tx/</li><li>https://provider.example/location/waco-tx/</li><li>&hellip; 13 more</li></ul></details>
+    <div class="rec"><b>What to do</b>Publish a 1200x630 share image and set og:image:width/height to match.</div>
+    <p class="cap">Capability: Own SEO strategy and organic website performance (technical SEO, on-page optimization)</p>
+  </article>
+</section>
+<section class="group">
+  <div class="group-head">
+    <span class="label" style="color:#5A6472">info</span>
+    <span class="desc">Observation, no action attached</span>
+    <span class="count">4</span>
+  </div>
+  <article class="finding" id="tag-inventory" style="border-left-color:#5A6472">
+    <div class="tags">
+      <span class="tag sev" style="background:#5A6472">info</span>
+      <span class="tag">tags</span>
+      <span class="tag conf-moderate">moderate confidence</span>
+    </div>
+    <h3>1 tracking platform detected in markup</h3>
+    <p class="detail">Google Tag Manager (GTM-MS7VW9N) on 147/151 pages [gtm]</p>
+    <pre>GTM-MS7VW9N</pre>
+    
+    <div class="rec"><b>What to do</b>Reconcile this list against the tag manager container. Anything in the container but not firing, or firing but not in the container, is drift worth closing.</div>
+    <p class="cap">Capability: Lead digital analytics and performance reporting, maintaining full-funnel conversion tracking</p>
+  </article>
+  <article class="finding" id="tag-gtm-no-ga4" style="border-left-color:#5A6472">
+    <div class="tags">
+      <span class="tag sev" style="background:#5A6472">info</span>
+      <span class="tag">tags</span>
+      <span class="tag conf-moderate">moderate confidence</span>
+    </div>
+    <h3>Google Tag Manager found, GA4 measurement ID not visible in markup</h3>
+    <p class="detail">This is the expected pattern when GA4 is configured inside the container rather than hard-coded. It cannot be confirmed from outside.</p>
+    <pre>GTM-MS7VW9N</pre>
+    
+    <div class="rec"><b>What to do</b>Confirm the GA4 configuration tag and its measurement ID inside the container.</div>
+    <p class="cap">Capability: Lead digital analytics and performance reporting, maintaining full-funnel conversion tracking</p>
+  </article>
+  <article class="finding" id="tag-conversion-surfaces" style="border-left-color:#5A6472">
+    <div class="tags">
+      <span class="tag sev" style="background:#5A6472">info</span>
+      <span class="tag">tags</span>
+      <span class="tag conf-high">high confidence</span>
+    </div>
+    <h3>4 pages carrying a lead form</h3>
+    <p class="detail">These are the conversion surfaces the funnel model depends on. Each needs a distinct, deduplicated conversion event with a stable name across GA4, Google Ads, and Meta.</p>
+    <pre>https://provider.example/search-locations/ - fields: input_28, input_29, input_29, input_29, input_29, input_29, input_29, input_29
+https://provider.example/partner-agencies/ - fields: input_1, input_4, input_5, input_6, input_8
+https://provider.example/career/ - fields: Part_time, Full_time, Brownsville, Mission, McAllen, HarkerHeights, Woodway, Schertz
+https://provider.example/locations/ - fields: zipcode, state, name</pre>
+    <details><summary>4 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/search-locations/</li><li>https://provider.example/partner-agencies/</li><li>https://provider.example/career/</li><li>https://provider.example/locations/</li></ul></details>
+    <div class="rec"><b>What to do</b>Define the event taxonomy in docs/05-measurement-model.md before adding tags, so paid and organic report against one definition of a lead.</div>
+    <p class="cap">Capability: Lead digital analytics and performance reporting, maintaining full-funnel conversion tracking</p>
+  </article>
+  <article class="finding" id="content-gap-covered" style="border-left-color:#5A6472">
+    <div class="tags">
+      <span class="tag sev" style="background:#5A6472">info</span>
+      <span class="tag">content-gap</span>
+      <span class="tag conf-low">low confidence</span>
+    </div>
+    <h3>26 questions with a plausible matching page</h3>
+    <p class="detail">IDF-weighted match against titles, headings, and meta descriptions. It confirms a page exists on the topic; it does not confirm the page ranks, or that the answer on it is any good.</p>
+    <pre>My 3 year old isn't talking yet. Should I be worried about autism? -&gt; https://provider.example/blog/autism-awareness-month/ (0.84)
+What are the early signs of autism in toddlers? -&gt; https://provider.example/blog/how-early-can-you-test-for-autism/ (0.79)
+How do I get my child evaluated for autism in Texas? -&gt; https://provider.example/blog/where-can-i-get-my-child-evaluated-for-autism/ (0.91)
+What is ABA therapy and does it actually work? -&gt; https://provider.example/blog/top-5-reasons-to-work-with-children-with-autism/ (1)
+Difference between speech therapy, occupational therapy, and ABA for autism -&gt; https://provider.example/blog/occupational-therapy-vs-aba-therapy/ (1)
+How many hours a week of ABA therapy does a child need? -&gt; https://provider.example/blog/understanding-extinction-bursts-what-parents-need-to-know/ (0.7)
+What questions should I ask an ABA provider before I enroll my child? -&gt; https://provider.example/blog/questions-to-ask-during-the-autism-evaluation-process/ (0.53)
+What is the difference between a BCBA and an RBT? -&gt; https://provider.example/blog/occupational-therapy-vs-aba-therapy/ (0.45)</pre>
+    <details><summary>26 affected URLs</summary>
+    <ul class="urls"><li>https://provider.example/blog/autism-awareness-month/</li><li>https://provider.example/blog/how-early-can-you-test-for-autism/</li><li>https://provider.example/blog/where-can-i-get-my-child-evaluated-for-autism/</li><li>https://provider.example/blog/top-5-reasons-to-work-with-children-with-autism/</li><li>https://provider.example/blog/occupational-therapy-vs-aba-therapy/</li><li>https://provider.example/blog/understanding-extinction-bursts-what-parents-need-to-know/</li><li>https://provider.example/blog/questions-to-ask-during-the-autism-evaluation-process/</li><li>https://provider.example/blog/occupational-therapy-vs-aba-therapy/</li><li>https://provider.example/insurance/</li><li>https://provider.example/blog/what-is-aba-therapy/</li><li>https://provider.example/service/full-time-aba-day-program/</li><li>https://provider.example/service/toilet-training-sessions/</li><li>https://provider.example/blog/what-to-look-for-in-an-aba-therapy-center/</li><li>https://provider.example/blog/is-my-child-too-young-for-aba-therapy/</li><li>https://provider.example/location/san-antonio-tx/</li><li>https://provider.example/location/san-antonio-tx/</li><li>https://provider.example/blog/how-to-reset-routines-after-the-holidays-aba-therapy-tips-for-texans-families/</li><li>https://provider.example/location/kingwood-tx/</li><li>https://provider.example/location/mcallen-tx/</li><li>https://provider.example/location/brownsville/</li><li>https://provider.example/parent-resources/autism-resources-for-families-in-dallas-fort-worth/</li><li>https://provider.example/location/harkerheights-tx/</li><li>https://provider.example/location/brazos-valley-tx/</li><li>https://provider.example/location/corpus-christi-tx/</li><li>https://provider.example/location/new-braunfels-tx/</li><li>https://provider.example/location/laredo/</li></ul></details>
+    <div class="rec"><b>What to do</b>Check these against real ranking data in Search Console once inside, and rewrite any that rank but do not convert.</div>
+    <p class="cap">Capability: Content direction to drive qualified traffic; AEO readiness</p>
+  </article>
+</section>
+
+    <section class="limits">
+      <h2>What this audit cannot see</h2>
+      <p>Everything above came from the public web. The following require account access and stay unknown
+      until then. No finding infers any of them.</p>
+      <ul>
+        <li>Traffic, sessions, and conversion rates</li>
+        <li>Query-level impressions, clicks, and position from Search Console</li>
+        <li>Spend, cost per click, cost per acquisition, and conversion volume by campaign</li>
+        <li>Tags injected client-side through a tag manager container</li>
+        <li>Business Profile insights, review volume, and listing accuracy against the real record</li>
+        <li>Which enquiries became scheduled appointments, and which became patients</li>
+      </ul>
+      <footer class="credit">digital-health-marketing &middot; github.com/Patriot7Six/Digital-Health-Marketing</footer>
+    </section>
+  </main>
+</div>
+
+</div>
+</body>
+</html>
