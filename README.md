@@ -2,9 +2,13 @@
 
 An outside-in digital acquisition audit for multi-location healthcare providers. It crawls a public website and reports what is capping organic, local, and answer-engine performance, plus where advertising pixels sit close enough to intake forms to be worth a compliance review.
 
-It uses public data only: no account access, no analytics, no ad platform data, no authenticated requests. `robots.txt` is parsed and obeyed.
+## What this is, stated up front
 
-Built as a working reference implementation for the capability set in a Digital Acquisition Manager role at a multi-clinic behavioural health provider. The strategy behind it is in [`docs/`](docs/); the reasoning is the point as much as the code.
+A demonstration artifact. It was built to work through the problems a Digital Acquisition Manager at a multi-clinic behavioural health provider would face, using only what any member of the public can see.
+
+There is no privileged information here. No account access, no analytics, no ad platform data, no internal documents, no conversations with anyone at the organisation whose public site is configured as the example target. Every finding it produces comes from pages a browser would load logged out.
+
+That constraint is the interesting part. It forces the tool to say what it does not know, and it means the analysis in [`docs/`](docs/) is reasoning rather than reporting. Where a conclusion depends on data that only exists inside an account, the tool marks it and moves on instead of guessing. [`docs/06-limitations.md`](docs/06-limitations.md) is the longest document in the repo for that reason.
 
 ## Why it exists
 

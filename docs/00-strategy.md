@@ -1,14 +1,22 @@
 # Strategy: bringing digital acquisition in-house
 
-The posting describes a function in transition. Paid and organic run through vendors and agency partners today, and the stated direction is to bring the capability fully in-house while adding an AI search visibility strategy. That transition, not campaign management, is the actual job.
+## What this document is
 
-Read that way, the first year has three problems in sequence: find out what is actually running, fix the structural things that cap every channel's ceiling, then take ownership without dropping performance during the handover.
+A proposal written from the outside, with no access to any account, any internal document, or anyone at the organisation. It is reasoning applied to a public job posting and a public website, nothing more. Read every recommendation below as "here is the case for doing this, and here is what would change my mind," not as a decision.
+
+That framing is not modesty. A plan built on public data alone has a specific failure mode, and naming it is the first thing worth doing.
 
 ## The counterargument, first
 
-The strongest argument against everything below: an outside-in audit can be confidently wrong. It sees the site, not the accounts. A finding that looks critical from outside can be a known issue with a scheduled fix, a deliberate trade-off, or already in an agency's backlog. Prioritising from public data alone risks spending the first month re-litigating decisions someone already made for good reasons.
+**An outside-in audit can be confidently wrong.** It sees the site, not the accounts. A finding that looks critical from outside can be a known issue with a scheduled fix, a deliberate trade-off someone made for good reasons, or already sitting in an agency's backlog. Prioritising from public data risks spending a first month re-litigating decisions that were already made correctly.
 
-So the first thing any of this earns is a conversation, not a mandate. Everything in the 30-day column below is a question, and the plan changes the moment real data contradicts it.
+So nothing here earns a mandate. It earns a conversation. Everything in the 30-day column below is a question, and the plan changes the moment real data contradicts it.
+
+## The shape of the problem
+
+The posting describes a function in transition. Paid and organic run through vendors and agency partners today, and the stated direction is to bring the capability fully in-house while adding an AI search visibility strategy. That transition, not campaign management, is the actual job.
+
+Read that way, the first year has three problems in sequence: find out what is actually running, fix the structural things that cap every channel's ceiling, then take ownership without dropping performance during the handover.
 
 ## Days 1 to 30: find the truth
 
@@ -52,6 +60,8 @@ Confidence: moderate. The clinic footprint and payer mix are verified from the p
 
 ## How this repo gets used
 
-It is a working tool, not a slide. `npm install && npm run recon -- audit -c config/empowerbh.json` produces a dated report against the live public site. Re-run it after the day-31-to-90 fixes and the findings should shrink; that delta is the argument for the work.
+It is a working tool, not a slide. `npm install && npm run recon -- audit -c config/empowerbh.json` produces a dated report against the live public site. Anyone can run it and check the findings against the pages themselves; nothing in the output depends on information the reader cannot independently verify.
 
-What it cannot do is stated as plainly as what it can. `docs/06-limitations.md` lists every category of data that requires account access, and every finding in the report carries a confidence level for exactly that reason.
+Re-run it after the structural fixes above and the findings should shrink. That delta is the argument for the work, and it is measurable from outside, which is unusual for marketing recommendations.
+
+What the tool cannot do is stated as plainly as what it can. `docs/06-limitations.md` lists every category of data that requires account access, and every finding carries a confidence level for exactly that reason.
