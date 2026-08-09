@@ -5,7 +5,7 @@ import { extractPage } from "./extract.js";
 import type { CrawlResult, PageRecord, TargetConfig } from "./types.js";
 
 const DEFAULT_UA =
-  "acquisition-recon/0.1 (+https://github.com/; public-data site audit; respects robots.txt)";
+  "digital-health-marketing/0.1 (+https://github.com/<your-account>/digital-health-marketing; public-data site audit; respects robots.txt)";
 
 export interface CrawlOptions {
   userAgent?: string;

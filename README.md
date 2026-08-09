@@ -1,4 +1,4 @@
-# acquisition-recon
+# digital-health-marketing
 
 An outside-in digital acquisition audit for multi-location healthcare providers. It crawls a public website and reports what is capping organic, local, and answer-engine performance, plus where advertising pixels sit close enough to intake forms to be worth a compliance review.
 
@@ -17,6 +17,8 @@ Most site audits produce a list of technical defects with no argument for why an
 ## Quick start
 
 ```bash
+git clone https://github.com/<your-account>/digital-health-marketing.git
+cd digital-health-marketing
 npm install
 npm test                                          # 26 assertions, no network
 npm run recon -- audit -c config/empowerbh.json   # writes reports/<name>-<date>.{md,html}
