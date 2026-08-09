@@ -14,7 +14,9 @@ The design constraint is the interesting part: working only from what any visito
 
 ## Sample output
 
-[`samples/`](samples/) holds a report generated against a real multi-location provider, run through the anonymiser so it demonstrates method without naming anyone. Open the HTML file in a browser.
+**[View the rendered report →](https://patriot7six.github.io/Digital-Health-Marketing/samples/multi-location-aba-provider-2026-08-09.html)**
+
+[`samples/`](samples/) holds a report generated against a real multi-location provider, run through the anonymiser so it demonstrates method without naming anyone.
 
 ## Quick start
 
