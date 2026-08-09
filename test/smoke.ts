@@ -6,6 +6,7 @@
 import { parseRobots, isAllowed } from "../src/net/robots.js";
 import { detectTags, extractPage } from "../src/extract.js";
 import { auditContentGap } from "../src/audits/content-gap.js";
+import { auditTechnicalSeo } from "../src/audits/technical-seo.js";
 import type { CrawlResult, QuerySet } from "../src/types.js";
 
 let pass = 0;
@@ -128,6 +129,117 @@ const qs: QuerySet = {
 const gap = auditContentGap(crawl, qs);
 check("content-gap: matched query covered", gap.covered.map((c) => c.queryId), ["q1"]);
 check("content-gap: unrelated query is a gap", gap.gaps.map((g) => g.queryId), ["q2"]);
+
+// --- staging-host detection must not fire on partner domains --------------
+// Regression: "pediatricpsychologytesting.com" contains "test" and
+// "paradigmdevelopmentcenter.com" contains "dev". Neither is a staging host.
+function pageWithLinks(url: string, links: string[]) {
+  const anchors = links.map((l) => `<a href="${l}">x</a>`).join("");
+  const doc = `<!doctype html><html><head><title>t</title></head><body><h1>t</h1><p>${"word ".repeat(
+    120,
+  )}</p>${anchors}</body></html>`;
+  return extractPage(
+    {
+      url,
+      finalUrl: url,
+      status: 200,
+      redirectChain: [],
+      contentType: "text/html",
+      body: doc,
+      bytes: doc.length,
+      elapsedMs: 1,
+    },
+    "https://ex.com",
+  );
+}
+
+const stagingCrawl: CrawlResult = {
+  origin: "https://ex.com",
+  startedAt: "",
+  finishedAt: "",
+  robotsTxt: "User-agent: *\nDisallow:\nSitemap: https://ex.com/sitemap.xml",
+  robotsSitemaps: ["https://ex.com/sitemap.xml"],
+  sitemapUrls: [],
+  skipped: [],
+  pages: [
+    pageWithLinks("https://ex.com/a", [
+      "https://www.pediatricpsychologytesting.com/",
+      "https://www.paradigmdevelopmentcenter.com/",
+      "https://www.stuartdevelopmentalpediatrics.com/",
+      "https://exstg.wpengine.com/asset.png",
+      "https://staging.ex.com/x",
+    ]),
+  ],
+};
+
+const stagingFindings = auditTechnicalSeo(stagingCrawl)
+  .filter((f) => f.id.startsWith("seo-staging-leak-"))
+  .map((f) => f.evidence[0])
+  .sort();
+
+check(
+  "staging: partner domains not flagged, real ones are",
+  stagingFindings,
+  ["exstg.wpengine.com", "staging.ex.com"],
+);
+
+// --- content gap must not report coverage from high-frequency terms --------
+// Every page shares "aba therapy autism texas"; only one is about insurance.
+const narrowPages = [
+  "ABA Therapy for Autism in Waco Texas",
+  "ABA Therapy for Autism in Kyle Texas",
+  "ABA Therapy for Autism in Spring Texas",
+  "ABA Therapy for Autism in Victoria Texas",
+  "Accepted Insurance Coverage for ABA Therapy in Texas",
+].map((title, i) => {
+  const doc = `<!doctype html><html><head><title>${title}</title></head><body><h1>${title}</h1><p>${"word ".repeat(
+    120,
+  )}</p></body></html>`;
+  return extractPage(
+    {
+      url: `https://ex.com/p${i}`,
+      finalUrl: `https://ex.com/p${i}`,
+      status: 200,
+      redirectChain: [],
+      contentType: "text/html",
+      body: doc,
+      bytes: doc.length,
+      elapsedMs: 1,
+    },
+    "https://ex.com",
+  );
+});
+
+const narrowCrawl: CrawlResult = {
+  origin: "https://ex.com",
+  startedAt: "",
+  finishedAt: "",
+  robotsTxt: null,
+  robotsSitemaps: [],
+  sitemapUrls: [],
+  skipped: [],
+  pages: narrowPages,
+};
+
+const narrowGap = auditContentGap(narrowCrawl, {
+  name: "narrow",
+  queries: [
+    { id: "g1", stage: "consideration", query: "Does insurance cover ABA therapy for autism in Texas?" },
+    { id: "g2", stage: "consideration", query: "What questions should I ask an ABA provider before enrolling my child?" },
+    { id: "g3", stage: "awareness", query: "What are the early signs of autism in toddlers?" },
+  ],
+});
+
+check(
+  "content-gap: distinctive-term query is covered",
+  narrowGap.covered.map((c) => c.queryId),
+  ["g1"],
+);
+check(
+  "content-gap: shared brand vocabulary alone is not coverage",
+  narrowGap.gaps.map((g) => g.queryId).sort(),
+  ["g2", "g3"],
+);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

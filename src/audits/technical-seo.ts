@@ -239,14 +239,19 @@ export function auditTechnicalSeo(crawl: CrawlResult): Finding[] {
   }
 
   // --- staging / non-production host references ----------------------------
+  // Only same-registrable-domain hosts or known hosting-provider preview
+  // domains count. A partner site called "pediatricpsychologytesting.com" is
+  // not a staging environment, and a bare substring match says it is.
   const stagingHosts = new Map<string, Set<string>>();
+  const siteDomain = registrableDomain(crawl.origin);
+
   for (const p of ok) {
     for (const link of [...p.externalLinks, ...p.images.map((i) => i.src)]) {
-      const m = /https?:\/\/([a-z0-9.-]*(?:staging|stg|dev|test)[a-z0-9.-]*\.[a-z.]+)/i.exec(link);
-      if (!m?.[1]) continue;
-      const set = stagingHosts.get(m[1]) ?? new Set<string>();
+      const host = hostOf(link);
+      if (!host || !looksNonProduction(host, siteDomain)) continue;
+      const set = stagingHosts.get(host) ?? new Set<string>();
       set.add(p.finalUrl);
-      stagingHosts.set(m[1], set);
+      stagingHosts.set(host, set);
     }
   }
   for (const [host, urls] of stagingHosts) {
@@ -333,6 +338,69 @@ export function auditTechnicalSeo(crawl: CrawlResult): Finding[] {
   }
 
   return out;
+}
+
+/** Domains whose subdomains are, by construction, non-production environments. */
+const PREVIEW_HOST_SUFFIXES = [
+  "wpengine.com",
+  "wpenginepowered.com",
+  "pantheonsite.io",
+  "kinsta.cloud",
+  "flywheelsites.com",
+  "flywheelstaging.com",
+  "netlify.app",
+  "vercel.app",
+  "azurewebsites.net",
+  "herokuapp.com",
+  "cloudwaysapps.com",
+  "wpmudev.host",
+  "myftpupload.com",
+];
+
+/** Tokens that mark an environment, matched as whole labels, never substrings. */
+const ENV_TOKENS = new Set([
+  "staging", "stage", "stg", "dev", "devel", "development",
+  "test", "testing", "qa", "uat", "sandbox", "preprod", "preview", "demo", "beta",
+]);
+
+function hostOf(u: string): string | null {
+  try {
+    return new URL(u).host.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Approximate eTLD+1. Good enough for the common case; multi-part public
+ * suffixes such as .co.uk will register one label too few, which makes this
+ * slightly more conservative rather than noisier.
+ */
+function registrableDomain(u: string): string | null {
+  const host = hostOf(u);
+  if (!host) return null;
+  const labels = host.split(".");
+  return labels.length <= 2 ? host : labels.slice(-2).join(".");
+}
+
+/**
+ * A host counts as non-production only when it is on a known preview provider,
+ * or when it shares the audited site's registrable domain and carries an
+ * environment token as a whole label. This is what stops a partner site named
+ * "…developmentcenter.com" or "…psychologytesting.com" from being reported as
+ * a staging leak.
+ */
+function looksNonProduction(host: string, siteDomain: string | null): boolean {
+  if (PREVIEW_HOST_SUFFIXES.some((s) => host === s || host.endsWith("." + s))) {
+    return true;
+  }
+  if (!siteDomain) return false;
+  if (host !== siteDomain && !host.endsWith("." + siteDomain)) return false;
+
+  // Split on dots and hyphens so "empowerbh-staging.example.com" is caught.
+  return host
+    .split(/[.-]/)
+    .some((label) => ENV_TOKENS.has(label));
 }
 
 function simple(

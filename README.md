@@ -20,7 +20,7 @@ Most site audits produce a list of technical defects with no argument for why an
 git clone https://github.com/Patriot7Six/Digital-Health-Marketing.git
 cd Digital-Health-Marketing
 npm install
-npm test                                          # 26 assertions, no network
+npm test                                          # 29 assertions, no network
 npm run recon -- audit -c config/empowerbh.json   # writes reports/<name>-<date>.{md,html}
 ```
 

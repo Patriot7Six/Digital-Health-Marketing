@@ -41,7 +41,7 @@ Findings in the report depend on data that is not observable from outside, and e
 
 ## Methodological caveats inside the tool
 
-- **Content-gap matching is term overlap against titles, headings, and meta descriptions**, not semantic similarity and not body text. It answers "does a page target this question", not "does this page rank". False gaps are expected where a page answers something in prose without saying so in a heading.
+- **Content-gap matching is IDF-weighted term overlap against titles, headings, and meta descriptions**, not semantic similarity and not body text. Terms are weighted by how rare they are in the corpus, because on a site with a narrow vocabulary an unweighted match reports near-total coverage regardless of what the pages answer. It still answers "does a page target this question", not "does this page rank". False gaps are expected where a page answers something in prose without saying so in a heading.
 - **Address and phone extraction are regex-based** against US formats. Anything rendered inside an image, a canvas, or a JavaScript-hydrated component is missed, which will produce false "no address found" results on JS-heavy sites.
 - **Clinic counting** cross-references navigation fragments against served pages, and falls back to counting distinct street addresses. A site that stacks clinics with neither anchors nor distinct addresses will undercount.
 - **AEO results are a single-provider sample** and non-deterministic. See `docs/03-aeo-methodology.md`.
