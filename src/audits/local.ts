@@ -242,6 +242,20 @@ export function auditLocal(
 }
 
 /**
+ * Anchor ids that name a clinic. The positive tokens are broad, so a denylist
+ * of interface vocabulary carries the weight: a site-wide widget with an id
+ * like "get_my_location_menu" matches "location" and would otherwise be
+ * counted as a clinic on every page it appears.
+ */
+const CLINIC_TOKENS = /(clinic|center|centre|campus)/i;
+const UI_NOISE =
+  /(menu|nav|navigation|button|btn|search|filter|modal|popup|dropdown|toggle|tab|header|footer|sidebar|widget|slider|carousel|overlay|drawer|accordion|form)/i;
+
+function looksLikeClinicAnchor(id: string): boolean {
+  return CLINIC_TOKENS.test(id) && !UI_NOISE.test(id);
+}
+
+/**
  * Counts how many distinct clinics a single URL is carrying.
  *
  * Two independent signals, unioned:
@@ -255,7 +269,6 @@ function clinicAnchors(
   p: PageRecord,
   fragmentsByPath: Map<string, Set<string>>,
 ): string[] {
-  const clinicish = /(clinic|center|centre|location|office|campus)/i;
   const found = new Set<string>();
 
   let path = "";
@@ -266,10 +279,10 @@ function clinicAnchors(
   }
 
   for (const frag of fragmentsByPath.get(path) ?? []) {
-    if (clinicish.test(frag)) found.add(frag);
+    if (looksLikeClinicAnchor(frag)) found.add(frag);
   }
   for (const id of p.anchorIds) {
-    if (clinicish.test(id)) found.add(id);
+    if (looksLikeClinicAnchor(id)) found.add(id);
   }
 
   if (found.size > 0) return [...found];

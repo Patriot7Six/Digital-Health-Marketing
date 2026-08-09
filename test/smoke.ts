@@ -7,6 +7,7 @@ import { parseRobots, isAllowed } from "../src/net/robots.js";
 import { detectTags, extractPage } from "../src/extract.js";
 import { auditContentGap } from "../src/audits/content-gap.js";
 import { auditTechnicalSeo } from "../src/audits/technical-seo.js";
+import { collectLocations } from "../src/audits/local.js";
 import type { CrawlResult, QuerySet } from "../src/types.js";
 
 let pass = 0;
@@ -239,6 +240,63 @@ check(
   "content-gap: shared brand vocabulary alone is not coverage",
   narrowGap.gaps.map((g) => g.queryId).sort(),
   ["g2", "g3"],
+);
+
+// --- clinic detection must ignore site-wide UI widgets --------------------
+// Regression: an id like "get_my_location_menu" contains "location" and was
+// counted as a clinic on every page carrying the nav widget.
+const locPage = (() => {
+  const doc = `<!doctype html><html><head><title>San Antonio</title></head><body>
+<h1>San Antonio</h1>
+<div id="get_my_location_menu"></div>
+<div id="location_search_form"></div>
+<div id="stone_oak_aba_clinic"></div>
+<div id="far_west_san_antonio_aba_clinic"></div>
+<p>${"word ".repeat(200)}</p>
+<p>Call (210) 346-8696. 6222 I-10 Suite 104, San Antonio, TX 78201.</p>
+</body></html>`;
+  return extractPage(
+    {
+      url: "https://ex.com/location/san-antonio-tx/",
+      finalUrl: "https://ex.com/location/san-antonio-tx/",
+      status: 200,
+      redirectChain: [],
+      contentType: "text/html",
+      body: doc,
+      bytes: doc.length,
+      elapsedMs: 1,
+    },
+    "https://ex.com",
+  );
+})();
+
+const locCrawl: CrawlResult = {
+  origin: "https://ex.com",
+  startedAt: "",
+  finishedAt: "",
+  robotsTxt: null,
+  robotsSitemaps: [],
+  sitemapUrls: [],
+  skipped: [],
+  pages: [locPage],
+};
+const locConfig = {
+  name: "t",
+  origin: "https://ex.com",
+  seeds: [],
+  maxPages: 10,
+  delayMs: 0,
+  concurrency: 1,
+  locationPathPrefixes: ["/location/"],
+  excludePatterns: [],
+  brandAliases: [],
+  competitors: [],
+};
+const locs = collectLocations(locCrawl, locConfig);
+check(
+  "local: UI widget ids excluded, real clinic anchors kept",
+  locs[0]?.anchors.sort(),
+  ["far_west_san_antonio_aba_clinic", "stone_oak_aba_clinic"],
 );
 
 console.log(`\n${pass} passed, ${fail} failed`);
