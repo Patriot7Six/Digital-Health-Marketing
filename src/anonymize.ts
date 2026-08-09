@@ -37,7 +37,7 @@ export interface Anonymized {
 }
 
 /** Word to substitute for a distinctive brand token found inside a longer string. */
-const TOKEN_REPLACEMENT = "redacted";
+const TOKEN_REPLACEMENT = "Provider";
 
 /**
  * Industry and geography vocabulary. These appear in a brand name without

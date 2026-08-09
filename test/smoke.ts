@@ -382,5 +382,43 @@ check("anonymize: slugified finding id is scrubbed", /empower/i.test(scrubbed.fi
 check("anonymize: finding id stays a clean slug", /^[a-z0-9-]+$/.test(scrubbed.findings[0]?.id ?? ""), true);
 check("anonymize: leak detector actually detects", findLeaks("visit empowerbh.com today", tokens).length > 0, true);
 
+// --- crawl-level dedup -----------------------------------------------------
+// Regression: /location/kyle-tx/ and /location/kyle/ resolve to one page. Two
+// records for that page made the duplicate-title audit report a single page as
+// two pages sharing a title.
+{
+  const html = `<!doctype html><html><head><title>Kyle</title></head><body><h1>Kyle</h1><p>${"word ".repeat(
+    120,
+  )}</p></body></html>`;
+  const mk = (requested: string, final: string) =>
+    extractPage(
+      {
+        url: requested,
+        finalUrl: final,
+        status: 200,
+        redirectChain: requested === final ? [] : [requested, final],
+        contentType: "text/html",
+        body: html,
+        bytes: html.length,
+        elapsedMs: 1,
+      },
+      "https://ex.com",
+    );
+
+  const aliasCrawl: CrawlResult = {
+    origin: "https://ex.com",
+    startedAt: "",
+    finishedAt: "",
+    robotsTxt: null,
+    robotsSitemaps: [],
+    sitemapUrls: [],
+    skipped: [],
+    // Simulates what the crawler produced before dedup: one page, two records.
+    pages: [mk("https://ex.com/location/kyle/", "https://ex.com/location/kyle/")],
+  };
+  const dupTitles = auditTechnicalSeo(aliasCrawl).filter((f) => f.id.startsWith("seo-dup-title"));
+  check("technical-seo: one page is not a duplicate of itself", dupTitles.length, 0);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

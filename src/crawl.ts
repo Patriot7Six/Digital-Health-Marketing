@@ -80,6 +80,12 @@ export async function crawlSite(
   for (const s of harvest.urls) consider(s);
 
   const pages: PageRecord[] = [];
+  // Several requested URLs can redirect to one page. Keyed on the final URL
+  // so an alias is crawled once and recorded once: without this, every
+  // downstream audit sees the same page twice and reports it as two, which
+  // manufactures duplicate-title and duplicate-listing findings out of
+  // nothing.
+  const seenFinal = new Set<string>();
   let cursor = 0;
   // Workers that are mid-fetch and may still push onto the frontier.
   let inFlight = 0;
@@ -105,6 +111,18 @@ export async function crawlSite(
       try {
         const res = await fetcher.get(url);
         const page = extractPage(res, origin);
+
+        const key = canonicalKey(page.finalUrl);
+        if (seenFinal.has(key)) {
+          // Already recorded under another alias. Still worth expanding, in
+          // case this response surfaced a link the first one did not.
+          if (!page.error && page.status === 200) {
+            for (const link of page.internalLinks) consider(link);
+          }
+          continue;
+        }
+        seenFinal.add(key);
+
         pages.push(page);
         opts.onProgress?.(pages.length, Math.min(frontier.length, config.maxPages), url);
 
@@ -132,4 +150,16 @@ export async function crawlSite(
     pages,
     skipped,
   };
+}
+
+/** Trailing-slash-insensitive key for identifying a page across aliases. */
+function canonicalKey(u: string): string {
+  try {
+    const url = new URL(u);
+    url.hash = "";
+    const path = url.pathname.replace(/\/+$/, "") || "/";
+    return `${url.origin}${path}${url.search}`;
+  } catch {
+    return u;
+  }
 }
