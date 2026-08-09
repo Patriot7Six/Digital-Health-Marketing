@@ -116,8 +116,13 @@ const PHONE_RE = /\(?\b\d{3}\)?[\s.\u2013\u2014-]\s?\d{3}[\s.\u2013\u2014-]\d{4}
  */
 const STATE_ABBR =
   "AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC";
+// Two details matter here. '#' belongs in the street class, or an address
+// like "6222 I-10 Suite #104 San Antonio, TX 78201" never matches in full.
+// And the leading lookbehind stops a match starting mid-address, which is
+// what produced a spurious "104 San Antonio, TX 78201" from that same string
+// once the full match failed.
 const ADDRESS_RE = new RegExp(
-  String.raw`\d{1,6}\s+[A-Za-z0-9.'\- ]{2,60}?,?\s+[A-Za-z.'\- ]{2,40},?\s+(?:${STATE_ABBR})\s+\d{5}(?:-\d{4})?`,
+  String.raw`(?<![#\w])\d{1,6}\s+[A-Za-z0-9.'#\- ]{2,60}?,?\s+[A-Za-z.'\- ]{2,40},?\s+(?:${STATE_ABBR})\s+\d{5}(?:-\d{4})?`,
   "g",
 );
 

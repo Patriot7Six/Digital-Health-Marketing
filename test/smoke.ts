@@ -298,6 +298,35 @@ check(
   locs[0]?.anchors.sort(),
   ["far_west_san_antonio_aba_clinic", "stone_oak_aba_clinic"],
 );
+check("local: anchor detection recorded", locs[0]?.detection, "anchor");
+
+// Regression: a suite number must not yield a second, spurious address.
+const suitePage = (() => {
+  const doc = `<!doctype html><html><head><title>x</title></head><body><h1>x</h1>
+<p>${"word ".repeat(120)}</p>
+<p>6222 I-10 Suite #104 San Antonio, TX 78201</p></body></html>`;
+  return extractPage(
+    {
+      url: "https://ex.com/location/hq/",
+      finalUrl: "https://ex.com/location/hq/",
+      status: 200,
+      redirectChain: [],
+      contentType: "text/html",
+      body: doc,
+      bytes: doc.length,
+      elapsedMs: 1,
+    },
+    "https://ex.com",
+  );
+})();
+check("extract: suite number does not create a second address", suitePage.addressLines.length, 1);
+
+// Regression: aliases redirecting to one page must be counted once.
+const dupCrawl: CrawlResult = {
+  ...locCrawl,
+  pages: [locPage, { ...locPage, url: "https://ex.com/location/nw-san-antonio-tx/" }],
+};
+check("local: redirect aliases counted once", collectLocations(dupCrawl, locConfig).length, 1);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

@@ -9,6 +9,12 @@ export interface LocationRecord {
   title?: string;
   /** Anchor IDs on the page, each of which usually marks a distinct clinic. */
   anchors: string[];
+  /**
+   * How `anchors` was derived. Anchor evidence is reliable; the address
+   * fallback demonstrably is not, since a footer address or a suite number
+   * can be parsed as a second clinic. The two are reported separately.
+   */
+  detection: "anchor" | "address" | "none";
   phones: string[];
   addresses: string[];
   hasLocalBusinessSchema: boolean;
@@ -37,25 +43,40 @@ export function collectLocations(
     }
   }
 
-  return crawl.pages
-    .filter((p) => p.status === 200 && !p.error)
-    .filter((p) => {
-      try {
-        const path = new URL(p.finalUrl).pathname;
-        return prefixes.some((pre) => path.startsWith(pre));
-      } catch {
-        return false;
-      }
-    })
-    .map((p) => ({
+  const out: LocationRecord[] = [];
+  // Several crawled URLs can redirect to one page. Keyed on the final URL so
+  // a single clinic page is not counted once per alias.
+  const seen = new Set<string>();
+
+  for (const p of crawl.pages) {
+    if (p.status !== 200 || p.error) continue;
+
+    let path: string;
+    try {
+      path = new URL(p.finalUrl).pathname;
+    } catch {
+      continue;
+    }
+    if (!prefixes.some((pre) => path.startsWith(pre))) continue;
+
+    const key = normalisePath(path);
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const { anchors, detection } = clinicAnchors(p, fragmentsByPath);
+    out.push({
       url: p.finalUrl,
       title: p.title,
-      anchors: clinicAnchors(p, fragmentsByPath),
+      anchors,
+      detection,
       phones: p.phones,
       addresses: p.addressLines,
       hasLocalBusinessSchema: hasLocalSchema(p),
       wordCount: p.wordCount,
-    }));
+    });
+  }
+
+  return out;
 }
 
 export function auditLocal(
@@ -84,7 +105,13 @@ export function auditLocal(
   // --- multiple clinics stacked on one URL ---------------------------------
   // This is the single most expensive local-SEO pattern for a multi-site
   // provider: Google wants one landing page per Business Profile.
-  const stacked = locations.filter((l) => l.anchors.length > 1);
+  //
+  // Only anchor evidence counts here. Address-derived counts go into a
+  // separate, lower-confidence finding below, because a footer address or a
+  // suite number parses as a second clinic often enough to be untrustworthy.
+  const stacked = locations.filter(
+    (l) => l.detection === "anchor" && l.anchors.length > 1,
+  );
   if (stacked.length > 0) {
     const extraClinics = stacked.reduce((n, l) => n + l.anchors.length - 1, 0);
     out.push({
@@ -102,6 +129,31 @@ export function auditLocal(
         "Split each clinic onto its own indexable URL with unique title, address, phone, hours, staff, and LocalBusiness schema. Then repoint the matching Business Profile to it. Do the highest-volume markets first.",
       capability: CAP,
       confidence: "high",
+    });
+  }
+
+  // Pages with several parsed addresses but no clinic anchors. Flagged for a
+  // human to check rather than counted, because address parsing picks up
+  // corporate footers and suite numbers.
+  const addressOnly = locations.filter(
+    (l) => l.detection === "address" && l.anchors.length > 1,
+  );
+  if (addressOnly.length > 0) {
+    out.push({
+      id: "local-possible-stacked-clinics",
+      module: "local",
+      severity: "medium",
+      title: `${plural(addressOnly.length, "location page")} may host more than one clinic, needs a manual check`,
+      detail:
+        "These pages carry several parseable street addresses but no clinic anchor to confirm the structure. Address parsing also matches corporate footers and suite numbers, so the count below is a prompt to look, not a measurement.",
+      evidence: addressOnly
+        .slice(0, 8)
+        .map((l) => `${l.url} - addresses parsed: ${l.anchors.join(" | ")}`),
+      urls: addressOnly.map((l) => l.url),
+      recommendation:
+        "Open each page and confirm how many clinics it serves. If more than one, it belongs with the critical finding above.",
+      capability: CAP,
+      confidence: "low",
     });
   }
 
@@ -268,7 +320,7 @@ function looksLikeClinicAnchor(id: string): boolean {
 function clinicAnchors(
   p: PageRecord,
   fragmentsByPath: Map<string, Set<string>>,
-): string[] {
+): { anchors: string[]; detection: "anchor" | "address" | "none" } {
   const found = new Set<string>();
 
   let path = "";
@@ -285,10 +337,15 @@ function clinicAnchors(
     if (looksLikeClinicAnchor(id)) found.add(id);
   }
 
-  if (found.size > 0) return [...found];
+  if (found.size > 0) return { anchors: [...found], detection: "anchor" };
 
-  // No anchors: fall back to distinct addresses on the page.
-  return [...new Set(p.addressLines)];
+  // No anchors: fall back to distinct addresses. Weak evidence, reported
+  // separately and never inside the critical finding.
+  const addresses = [...new Set(p.addressLines)];
+  return {
+    anchors: addresses,
+    detection: addresses.length > 0 ? "address" : "none",
+  };
 }
 
 function normalisePath(path: string): string {
