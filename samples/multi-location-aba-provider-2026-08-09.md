@@ -1,13 +1,13 @@
 # Digital acquisition audit: Multi-location ABA provider
 
-Generated 2026-08-09 23:01 UTC from publicly available data only. No account access, no analytics, no ad platform data.
+Generated 2026-08-09 23:43 UTC from publicly available data only. No account access, no analytics, no ad platform data.
 
 ## Scope
 
 | | |
 |---|---|
 | Origin | https://provider.example |
-| Pages crawled | 151 (151 returned 200) |
+| Pages crawled | 151 (149 returned 200) |
 | URLs in sitemap | 149 |
 | robots.txt | present |
 | Skipped by robots.txt | 0 |
@@ -18,18 +18,18 @@ Generated 2026-08-09 23:01 UTC from publicly available data only. No account acc
 | Severity | Count |
 |---|---|
 | critical | 1 |
-| high | 7 |
+| high | 4 |
 | medium | 7 |
-| low | 5 |
+| low | 4 |
 | info | 4 |
 
 ## What to fix first
 
 1. **4 URLs hosting more than one clinic, leaving roughly 7 clinics with no page of their own** (critical) - Split each clinic onto its own indexable URL with unique title, address, phone, hours, staff, and LocalBusiness schema. Then repoint the matching Business Profile to it. Do the highest-volume markets first.
-2. **2 pages sharing the title "Accepted Insurance | ABA Therapy Insurance Coverage in Texas"** (high) - Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.
-3. **2 pages sharing the title "Thank You - redacted Behavioral Health"** (high) - Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.
-4. **2 pages sharing the title "ABA Therapy Clinics in Texas | redacted Behavioral Health Lo…"** (high) - Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.
-5. **2 pages sharing the title "ABA Therapy for Children with Autism | redacted BH"** (high) - Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.
+2. **2 pages sharing the title "Thank You - Provider Behavioral Health"** (high) - Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.
+3. **2 pages sharing the title "ABA Therapy Clinics in Texas | Provider Behavioral Health Lo…"** (high) - Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.
+4. **Production pages reference the non-production host Providerstg.wpengine.com** (high) - Replace absolute staging URLs with relative or production-absolute paths, and confirm the staging environment returns noindex plus HTTP auth.
+5. **2 linked URLs failing to return a page** (high) - Fix or 301 each URL, then correct the internal links pointing at it.
 
 ## CRITICAL
 
@@ -63,7 +63,7 @@ Affected URLs (4):
 
 ## HIGH
 
-### 2 pages sharing the title "Accepted Insurance | ABA Therapy Insurance Coverage in Texas"
+### 2 pages sharing the title "Thank You - Provider Behavioral Health"
 
 `technical-seo` · confidence: high
 
@@ -72,30 +72,7 @@ Duplicate titles across pages compete for the same queries and give searchers no
 Evidence:
 
 ```
-Accepted Insurance | ABA Therapy Insurance Coverage in Texas
-```
-
-Affected URLs (2):
-
-- https://provider.example/insurance/
-- https://provider.example/insurance/
-
-**Recommendation.** Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.
-
-*Maps to: Own SEO strategy and organic website performance (technical SEO, on-page optimization)*
-
----
-
-### 2 pages sharing the title "Thank You - redacted Behavioral Health"
-
-`technical-seo` · confidence: high
-
-Duplicate titles across pages compete for the same queries and give searchers no way to tell the results apart.
-
-Evidence:
-
-```
-Thank You - redacted Behavioral Health
+Thank You - Provider Behavioral Health
 ```
 
 Affected URLs (2):
@@ -109,7 +86,7 @@ Affected URLs (2):
 
 ---
 
-### 2 pages sharing the title "ABA Therapy Clinics in Texas | redacted Behavioral Health Lo…"
+### 2 pages sharing the title "ABA Therapy Clinics in Texas | Provider Behavioral Health Lo…"
 
 `technical-seo` · confidence: high
 
@@ -118,7 +95,7 @@ Duplicate titles across pages compete for the same queries and give searchers no
 Evidence:
 
 ```
-ABA Therapy Clinics in Texas | redacted Behavioral Health Locations
+ABA Therapy Clinics in Texas | Provider Behavioral Health Locations
 ```
 
 Affected URLs (2):
@@ -132,76 +109,7 @@ Affected URLs (2):
 
 ---
 
-### 2 pages sharing the title "ABA Therapy for Children with Autism | redacted BH"
-
-`technical-seo` · confidence: high
-
-Duplicate titles across pages compete for the same queries and give searchers no way to tell the results apart.
-
-Evidence:
-
-```
-ABA Therapy for Children with Autism | redacted BH
-```
-
-Affected URLs (2):
-
-- https://provider.example/service/aba-services/
-- https://provider.example/service/aba-services/
-
-**Recommendation.** Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.
-
-*Maps to: Own SEO strategy and organic website performance (technical SEO, on-page optimization)*
-
----
-
-### 2 pages sharing the title "ABA Therapy for Autism in San Antonio, TX | redacted BH"
-
-`technical-seo` · confidence: high
-
-Duplicate titles across pages compete for the same queries and give searchers no way to tell the results apart.
-
-Evidence:
-
-```
-ABA Therapy for Autism in San Antonio, TX | redacted BH
-```
-
-Affected URLs (2):
-
-- https://provider.example/location/san-antonio-tx/
-- https://provider.example/location/san-antonio-tx/
-
-**Recommendation.** Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.
-
-*Maps to: Own SEO strategy and organic website performance (technical SEO, on-page optimization)*
-
----
-
-### 2 pages sharing the title "ABA Therapy for Autism in Kyle, TX | redacted BH"
-
-`technical-seo` · confidence: high
-
-Duplicate titles across pages compete for the same queries and give searchers no way to tell the results apart.
-
-Evidence:
-
-```
-ABA Therapy for Autism in Kyle, TX | redacted BH
-```
-
-Affected URLs (2):
-
-- https://provider.example/location/kyle/
-- https://provider.example/location/kyle/
-
-**Recommendation.** Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.
-
-*Maps to: Own SEO strategy and organic website performance (technical SEO, on-page optimization)*
-
----
-
-### Production pages reference the non-production host redactedstg.wpengine.com
+### Production pages reference the non-production host Providerstg.wpengine.com
 
 `technical-seo` · confidence: high
 
@@ -210,7 +118,7 @@ Hard-coded staging URLs in live markup leak internal infrastructure, can serve s
 Evidence:
 
 ```
-redactedstg.wpengine.com
+Providerstg.wpengine.com
 ```
 
 Affected URLs (2):
@@ -224,15 +132,39 @@ Affected URLs (2):
 
 ---
 
+### 2 linked URLs failing to return a page
+
+`technical-seo` · confidence: high
+
+Internally linked URLs returning an error waste crawl budget and break user paths.
+
+Evidence:
+
+```
+404 https://provider.example/cdn-cgi/l/email-protection
+404 https://provider.example/blog/what-is-a%EE%80%80ba-therapy/
+```
+
+Affected URLs (2):
+
+- https://provider.example/cdn-cgi/l/email-protection
+- https://provider.example/blog/what-is-a%EE%80%80ba-therapy/
+
+**Recommendation.** Fix or 301 each URL, then correct the internal links pointing at it.
+
+*Maps to: Own SEO strategy and organic website performance (technical SEO, on-page optimization)*
+
+---
+
 ## MEDIUM
 
-### 6 pages without a meta description
+### 8 pages without a meta description
 
 `technical-seo` · confidence: high
 
 Search engines generate a snippet from body text instead, which is rarely the sentence that converts.
 
-Affected URLs (6):
+Affected URLs (8):
 
 - https://provider.example/thank-you/
 - https://provider.example/thank-you-pa/
@@ -240,6 +172,8 @@ Affected URLs (6):
 - https://provider.example/referral-form-copy/
 - https://provider.example/sdk-snippet/
 - https://provider.example/parent-resources/
+- https://provider.example/parent-resources/page/8/
+- https://provider.example/parent-resources/page/2/
 
 **Recommendation.** Write a description per page ending in the action you want a parent to take.
 
@@ -269,7 +203,7 @@ Affected URLs (7):
 
 ---
 
-### 1 page under 300 words of body copy
+### 3 pages under 300 words of body copy
 
 `technical-seo` · confidence: moderate
 
@@ -279,11 +213,15 @@ Evidence:
 
 ```
 https://provider.example/parent-resources/ - 288 words
+https://provider.example/parent-resources/page/8/ - 288 words
+https://provider.example/parent-resources/page/2/ - 291 words
 ```
 
-Affected URLs (1):
+Affected URLs (3):
 
 - https://provider.example/parent-resources/
+- https://provider.example/parent-resources/page/8/
+- https://provider.example/parent-resources/page/2/
 
 **Recommendation.** Expand each page to answer the questions a visitor actually arrives with. Thin pages are also the ones answer engines skip, because there is no substantive passage to quote.
 
@@ -291,13 +229,13 @@ Affected URLs (1):
 
 ---
 
-### 328 images without an alt attribute
+### 326 images without an alt attribute
 
 `technical-seo` · confidence: high
 
 Missing alt text is both an accessibility defect under WCAG 1.1.1 and lost image-search context. For a provider serving families with disabilities, the accessibility side is the larger exposure.
 
-Affected URLs (147):
+Affected URLs (149):
 
 - https://provider.example/
 - https://provider.example/search-locations/
@@ -309,7 +247,7 @@ Affected URLs (147):
 - https://provider.example/blog/autism-and-electronic-devices/
 - https://provider.example/blog/occupational-therapy-vs-aba-therapy/
 - https://provider.example/blog/autism-awareness-month/
-- ... 137 more
+- ... 139 more
 
 **Recommendation.** Add descriptive alt text to content images and alt="" to decorative ones. The empty string is a deliberate signal; a missing attribute is not.
 
@@ -401,15 +339,15 @@ ABA therapy centers in The Woodlands and Spring Texas
 
 ## LOW
 
-### 15 titles over 65 characters
+### 17 titles over 65 characters
 
 `technical-seo` · confidence: high
 
 Longer titles are truncated in results, so the closing words are not seen.
 
-Affected URLs (15):
+Affected URLs (17):
 
-- https://provider.example/blog/redacted-spectacular-kids-partnership-missouri-city/
+- https://provider.example/blog/ebh-spectacular-kids-partnership-missouri-city/
 - https://provider.example/locations/
 - https://provider.example/locations-draft/
 - https://provider.example/central-el-paso-draft/
@@ -419,7 +357,7 @@ Affected URLs (15):
 - https://provider.example/parent-resources/autism-resources-for-families-in-houston/
 - https://provider.example/parent-resources/autism-resources-for-families-in-dallas-fort-worth/
 - https://provider.example/parent-resources/autism-resources-for-families-in-el-paso/
-- ... 5 more
+- ... 7 more
 
 **Recommendation.** Front-load the distinguishing terms; keep titles near 60 characters.
 
@@ -443,7 +381,7 @@ Affected URLs (1):
 
 ---
 
-### 274 image URLs containing unencoded spaces or brackets
+### 265 image URLs containing unencoded spaces or brackets
 
 `technical-seo` · confidence: high
 
@@ -459,7 +397,7 @@ https://provider.example/wp-content/themes/twentytwentyone-child/assets/images/I
 https://provider.example/wp-content/themes/twentytwentyone-child/assets/images/PPF [R].png
 ```
 
-Affected URLs (147):
+Affected URLs (149):
 
 - https://provider.example/
 - https://provider.example/search-locations/
@@ -471,37 +409,9 @@ Affected URLs (147):
 - https://provider.example/blog/autism-and-electronic-devices/
 - https://provider.example/blog/occupational-therapy-vs-aba-therapy/
 - https://provider.example/blog/autism-awareness-month/
-- ... 137 more
+- ... 139 more
 
 **Recommendation.** Rename assets to lowercase hyphenated filenames and update references.
-
-*Maps to: Own SEO strategy and organic website performance (technical SEO, on-page optimization)*
-
----
-
-### 4 internal links resolving through a redirect
-
-`technical-seo` · confidence: high
-
-Each hop costs latency and slightly dilutes link signals.
-
-Evidence:
-
-```
-https://provider.example/blog/does-insurance-cover-autism-evaluations/ -> https://provider.example/insurance/
-https://provider.example/location/nw-san-antonio-tx/ -> https://provider.example/location/san-antonio-tx/
-https://provider.example/location/kyle-tx/ -> https://provider.example/location/kyle/
-https://provider.example/service/diagnostic-services/ -> https://provider.example/service/aba-services/
-```
-
-Affected URLs (4):
-
-- https://provider.example/blog/does-insurance-cover-autism-evaluations/
-- https://provider.example/location/nw-san-antonio-tx/
-- https://provider.example/location/kyle-tx/
-- https://provider.example/service/diagnostic-services/
-
-**Recommendation.** Point internal links at final URLs.
 
 *Maps to: Own SEO strategy and organic website performance (technical SEO, on-page optimization)*
 
@@ -516,22 +426,22 @@ og:image is declared at 250x250. Facebook and LinkedIn fall back to a small thum
 Evidence:
 
 ```
-https://provider.example/wp-content/uploads/2022/07/redacted-redacted-Health-Logo.png
+https://provider.example/wp-content/uploads/2022/07/Provider-Behavioural-Health-Logo.png
 ```
 
-Affected URLs (53):
+Affected URLs (52):
 
 - https://provider.example/
 - https://provider.example/search-locations/
 - https://provider.example/get-started/
-- https://provider.example/insurance/
 - https://provider.example/insurance/
 - https://provider.example/thank-you/
 - https://provider.example/thank-you-pa/
 - https://provider.example/notice-of-hipaa-privacy-breach/
 - https://provider.example/referral-form-copy/
 - https://provider.example/contact/
-- ... 43 more
+- https://provider.example/partner-agencies/
+- ... 42 more
 
 **Recommendation.** Publish a 1200x630 share image and set og:image:width/height to match.
 
@@ -545,7 +455,7 @@ Affected URLs (53):
 
 `tags` · confidence: moderate
 
-Google Tag Manager (GTM-MS7VW9N) on 147/151 pages [gtm]
+Google Tag Manager (GTM-MS7VW9N) on 149/149 pages [gtm]
 
 Evidence:
 
@@ -620,7 +530,7 @@ How do I get my child evaluated for autism in Texas? -> https://provider.example
 What is ABA therapy and does it actually work? -> https://provider.example/blog/top-5-reasons-to-work-with-children-with-autism/ (1)
 Difference between speech therapy, occupational therapy, and ABA for autism -> https://provider.example/blog/occupational-therapy-vs-aba-therapy/ (1)
 How many hours a week of ABA therapy does a child need? -> https://provider.example/blog/understanding-extinction-bursts-what-parents-need-to-know/ (0.7)
-What questions should I ask an ABA provider before I enroll my child? -> https://provider.example/blog/questions-to-ask-during-the-autism-evaluation-process/ (0.53)
+What questions should I ask an ABA provider before I enroll my child? -> https://provider.example/blog/questions-to-ask-during-the-autism-evaluation-process/ (0.54)
 What is the difference between a BCBA and an RBT? -> https://provider.example/blog/occupational-therapy-vs-aba-therapy/ (0.45)
 ```
 
