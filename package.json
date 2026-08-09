@@ -4,6 +4,11 @@
   "private": true,
   "description": "Outside-in digital acquisition audit for multi-location healthcare providers. Collects only publicly available data.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Patriot7Six/Digital-Health-Marketing.git"
+  },
+  "homepage": "https://github.com/Patriot7Six/Digital-Health-Marketing#readme",
   "type": "module",
   "engines": {
     "node": ">=20.11"
