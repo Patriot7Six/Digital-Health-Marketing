@@ -12,6 +12,7 @@ import { auditContentGap } from "./audits/content-gap.js";
 import { runAeo, scoreAeo } from "./aeo/run.js";
 import { renderMarkdown, type ReportInput } from "./report/markdown.js";
 import { renderHtml } from "./report/html.js";
+import { anonymize } from "./anonymize.js";
 
 const program = new Command();
 
@@ -32,6 +33,10 @@ program
   .option("--aeo-web", "let the AEO model search the live web", false)
   .option("--aeo-limit <n>", "cap the number of AEO queries", "20")
   .option("--json", "also write the raw crawl and findings as JSON", false)
+  .option(
+    "--anonymize [label]",
+    "strip the target's name and domain from the report so it can be published as a work sample",
+  )
   .action(async (opts) => {
     const config = await loadConfig(opts.config);
     if (opts.maxPages) {
@@ -88,9 +93,23 @@ program
       }
     }
 
-    const input: ReportInput = { config, crawl, findings, aeoRan };
+    let input: ReportInput = { config, crawl, findings, aeoRan };
+
+    if (opts.anonymize) {
+      const label =
+        typeof opts.anonymize === "string" ? opts.anonymize : "Multi-location provider";
+      const scrubbed = anonymize(config, crawl, findings, { label });
+      input = {
+        config: scrubbed.config,
+        crawl: scrubbed.crawl,
+        findings: scrubbed.findings,
+        aeoRan,
+      };
+      log(`Anonymised as "${label}".`);
+    }
+
     const stamp = new Date().toISOString().slice(0, 10);
-    const slug = config.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const slug = input.config.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
     await mkdir(opts.out, { recursive: true });
     const mdPath = join(opts.out, `${slug}-${stamp}.md`);
@@ -99,8 +118,8 @@ program
     await writeFile(htmlPath, renderHtml(input), "utf8");
 
     if (opts.json) {
-      await writeJson(opts.out, `${slug}-${stamp}-crawl.json`, crawl);
-      await writeJson(opts.out, `${slug}-${stamp}-findings.json`, findings);
+      await writeJson(opts.out, `${slug}-${stamp}-crawl.json`, input.crawl);
+      await writeJson(opts.out, `${slug}-${stamp}-findings.json`, input.findings);
     }
 
     log("");

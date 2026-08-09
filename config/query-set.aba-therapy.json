@@ -1,0 +1,199 @@
+{
+  "name": "ABA therapy, family search intent (Texas markets)",
+  "notes": "Questions phrased the way a parent asks them, not the way a marketer writes a keyword. Stages: awareness (something is wrong, no diagnosis yet), consideration (diagnosis in hand, comparing options), decision (ready to contact a provider), local (a specific market). Rebuild this set from Search Console query data once inside; until then it is informed judgement, not measured demand.",
+  "queries": [
+    {
+      "id": "aw-01",
+      "stage": "awareness",
+      "query": "My 3 year old isn't talking yet. Should I be worried about autism?"
+    },
+    {
+      "id": "aw-02",
+      "stage": "awareness",
+      "query": "What are the early signs of autism in toddlers?"
+    },
+    {
+      "id": "aw-03",
+      "stage": "awareness",
+      "query": "How do I get my child evaluated for autism in Texas?"
+    },
+    {
+      "id": "aw-04",
+      "stage": "awareness",
+      "query": "What is ABA therapy and does it actually work?"
+    },
+    {
+      "id": "aw-05",
+      "stage": "awareness",
+      "query": "Who diagnoses autism in children and how long does the wait take?"
+    },
+    {
+      "id": "aw-06",
+      "stage": "awareness",
+      "query": "Difference between speech therapy, occupational therapy, and ABA for autism"
+    },
+    {
+      "id": "aw-07",
+      "stage": "awareness",
+      "query": "Is ABA therapy controversial? What do autistic adults say about it?"
+    },
+    {
+      "id": "co-01",
+      "stage": "consideration",
+      "query": "How many hours a week of ABA therapy does a child need?"
+    },
+    {
+      "id": "co-02",
+      "stage": "consideration",
+      "query": "Center based vs in home ABA therapy, which is better for a young child?"
+    },
+    {
+      "id": "co-03",
+      "stage": "consideration",
+      "query": "What questions should I ask an ABA provider before I enroll my child?"
+    },
+    {
+      "id": "co-04",
+      "stage": "consideration",
+      "query": "What is the difference between a BCBA and an RBT?"
+    },
+    {
+      "id": "co-05",
+      "stage": "consideration",
+      "query": "How much does ABA therapy cost per hour without insurance?"
+    },
+    {
+      "id": "co-06",
+      "stage": "consideration",
+      "query": "Does insurance cover ABA therapy for autism in Texas?"
+    },
+    {
+      "id": "co-07",
+      "stage": "consideration",
+      "query": "Does Texas Medicaid cover ABA therapy for children with autism?"
+    },
+    {
+      "id": "co-08",
+      "stage": "consideration",
+      "query": "Does TRICARE cover ABA therapy for military families with an autistic child?"
+    },
+    {
+      "id": "co-09",
+      "stage": "consideration",
+      "query": "What is a full time ABA day program and who is it for?"
+    },
+    {
+      "id": "co-10",
+      "stage": "consideration",
+      "query": "Can ABA therapy help with feeding problems or toilet training?"
+    },
+    {
+      "id": "co-11",
+      "stage": "consideration",
+      "query": "How long is the waitlist for ABA therapy in Texas?"
+    },
+    {
+      "id": "de-01",
+      "stage": "decision",
+      "query": "Best ABA therapy providers for children with autism in Texas"
+    },
+    {
+      "id": "de-02",
+      "stage": "decision",
+      "query": "How do I start ABA therapy for my child? What are the steps?"
+    },
+    {
+      "id": "de-03",
+      "stage": "decision",
+      "query": "Which ABA clinics in Texas accept TRICARE?"
+    },
+    {
+      "id": "de-04",
+      "stage": "decision",
+      "query": "ABA therapy centers that accept Blue Cross Blue Shield in Texas"
+    },
+    {
+      "id": "de-05",
+      "stage": "decision",
+      "query": "What should I bring to my child's first ABA assessment?"
+    },
+    {
+      "id": "lo-01",
+      "stage": "local",
+      "market": "San Antonio",
+      "query": "ABA therapy for autism near me in San Antonio Texas"
+    },
+    {
+      "id": "lo-02",
+      "stage": "local",
+      "market": "San Antonio",
+      "query": "Autism therapy clinics near Stone Oak San Antonio"
+    },
+    {
+      "id": "lo-03",
+      "stage": "local",
+      "market": "San Antonio",
+      "query": "ABA therapy near Lackland Air Force Base for military families"
+    },
+    {
+      "id": "lo-04",
+      "stage": "local",
+      "market": "Houston",
+      "query": "ABA therapy centers in The Woodlands and Spring Texas"
+    },
+    {
+      "id": "lo-05",
+      "stage": "local",
+      "market": "Houston",
+      "query": "Autism services in Kingwood or Humble Texas"
+    },
+    {
+      "id": "lo-06",
+      "stage": "local",
+      "market": "Rio Grande Valley",
+      "query": "ABA therapy in McAllen or Edinburg Texas"
+    },
+    {
+      "id": "lo-07",
+      "stage": "local",
+      "market": "Rio Grande Valley",
+      "query": "Servicios de terapia ABA para ninos con autismo en Brownsville Texas"
+    },
+    {
+      "id": "lo-08",
+      "stage": "local",
+      "market": "El Paso",
+      "query": "ABA therapy for children in El Paso Texas near Fort Bliss"
+    },
+    {
+      "id": "lo-09",
+      "stage": "local",
+      "market": "Central TX",
+      "query": "ABA therapy near Fort Cavazos and Harker Heights Texas"
+    },
+    {
+      "id": "lo-10",
+      "stage": "local",
+      "market": "Central TX",
+      "query": "Autism therapy in Waco or Brazos Valley Texas"
+    },
+    {
+      "id": "lo-11",
+      "stage": "local",
+      "market": "Coastal TX",
+      "query": "ABA therapy clinics in Corpus Christi Texas"
+    },
+    {
+      "id": "lo-12",
+      "stage": "local",
+      "market": "New Braunfels",
+      "query": "ABA therapy in New Braunfels or Schertz Texas"
+    },
+    {
+      "id": "lo-13",
+      "stage": "local",
+      "market": "Laredo",
+      "query": "Is there ABA therapy for autism in Laredo Texas?"
+    }
+  ]
+}

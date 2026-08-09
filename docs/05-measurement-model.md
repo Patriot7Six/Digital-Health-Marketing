@@ -1,6 +1,6 @@
 # Measurement model
 
-The posting asks for full-funnel conversion tracking, executive dashboards, and reporting on cost per acquisition and channel efficiency. Those three things fail for the same reason: nobody agreed what a conversion was before the tags went in.
+Full-funnel conversion tracking, executive dashboards, and reporting on cost per acquisition all fail for the same reason: nobody agreed what a conversion was before the tags went in.
 
 ## The funnel
 

@@ -1,6 +1,6 @@
 # HIPAA and healthcare digital marketing
 
-The posting lists HIPAA marketing awareness under Required, not Preferred. This document sets out the position the tooling encodes, with primary sources. Nothing here is legal advice, and every remediation below is a conversation with counsel and privacy before it is a ticket.
+Healthcare marketing carries a constraint most digital marketing does not. This document sets out the position the tooling encodes, with primary sources. Nothing here is legal advice, and every remediation below is a conversation with counsel and privacy before it is a ticket.
 
 ## Where the line actually sits, as of the sources cited
 
@@ -54,6 +54,6 @@ Measurement gets harder under all five. That trade is the job, and the argument 
 
 Google Ads restricts personalised advertising around health conditions, and Meta removed detailed health-related targeting options. These are platform policies, enforced by account suspension rather than by a regulator. They constrain audience strategy independently of anything above, and they are why healthcare paid media leans on geography, intent keywords, and creative rather than on audience attributes. Verify current policy text before building any audience: both platforms revise these pages without notice.
 
-## The one thing worth saying to a VP of Marketing
+## Why the distinction matters
 
-Most digital marketers in healthcare know "HIPAA" as a reason legal says no. Fewer can say which part of the OCR bulletin survives, why the vacatur narrowed metadata but not form content, or where the FTC picks up what HIPAA drops. That distinction is the difference between a marketing function that stalls on compliance and one that ships inside it.
+"HIPAA" often functions as a reason legal says no, without much shared understanding of where the line actually falls. Knowing which part of the OCR bulletin survives, why the vacatur narrowed metadata but not form content, and where the FTC picks up what HIPAA drops is the difference between a marketing function that stalls on compliance and one that ships inside it.

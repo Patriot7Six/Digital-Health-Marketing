@@ -6,3 +6,6 @@ reports/*
 !reports/.gitkeep
 *.log
 .DS_Store
+
+# Local target configs. Keep real audit targets out of the public repo.
+config/*.local.json

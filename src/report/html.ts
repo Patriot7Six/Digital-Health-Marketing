@@ -2,28 +2,43 @@ import type { Finding, Severity } from "../types.js";
 import type { ReportInput } from "./markdown.js";
 
 const ORDER: Severity[] = ["critical", "high", "medium", "low", "info"];
+const CONFIDENCE: Array<Finding["confidence"]> = ["high", "moderate", "low"];
 
-const COLOR: Record<Severity, string> = {
-  critical: "#8c1c13",
-  high: "#b45309",
-  medium: "#7c6f1f",
-  low: "#3f6212",
-  info: "#475569",
+const SEV: Record<Severity, { color: string; tint: string; note: string }> = {
+  critical: { color: "#A4243B", tint: "#F7E9EC", note: "Blocks acquisition or creates regulatory exposure" },
+  high: { color: "#B3541E", tint: "#FAEDE4", note: "Measurably suppresses qualified traffic or conversion" },
+  medium: { color: "#8A6D1F", tint: "#F8F2E1", note: "Degrades performance, fix in the normal cycle" },
+  low: { color: "#3F6B4F", tint: "#EAF1EC", note: "Hygiene" },
+  info: { color: "#5A6472", tint: "#EFF1F4", note: "Observation, no action attached" },
 };
 
-/** Single-file HTML. No build step, no CDN, opens from disk. */
+/**
+ * A single self-contained HTML file. No build step, no network, no fonts to
+ * fetch: it has to open from a double-click on a machine that has never seen
+ * this repo.
+ *
+ * The organising idea is that severity alone is not the whole story. Every
+ * finding also carries how sure the tool is, because an audit run from
+ * outside an account has real limits, and a report that hides that is
+ * pretending. The matrix near the top plots both axes at once, which is the
+ * one view this report has that a conventional site audit does not.
+ */
 export function renderHtml(input: ReportInput): string {
   const { config, crawl, findings } = input;
   const ok = crawl.pages.filter((p) => p.status === 200 && !p.error).length;
+  const actionable = findings.filter((f) => f.severity !== "info");
+  const generated = new Date().toISOString().slice(0, 16).replace("T", " ");
 
-  const counts = ORDER.map((s) => ({
-    severity: s,
-    n: findings.filter((f) => f.severity === s).length,
-  }));
-
-  const cards = ORDER.flatMap((s) =>
-    findings.filter((f) => f.severity === s).map((f) => findingCard(f)),
-  ).join("\n");
+  const indexItems = findings
+    .slice()
+    .sort((a, b) => ORDER.indexOf(a.severity) - ORDER.indexOf(b.severity))
+    .map(
+      (f) =>
+        `<li><a href="#${esc(f.id)}"><span class="dot" style="background:${
+          SEV[f.severity].color
+        }"></span><span>${esc(f.title)}</span></a></li>`,
+    )
+    .join("\n      ");
 
   return `<!doctype html>
 <html lang="en">
@@ -31,108 +46,231 @@ export function renderHtml(input: ReportInput): string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>Digital acquisition audit &mdash; ${esc(config.name)}</title>
+<title>Acquisition audit &mdash; ${esc(config.name)}</title>
 <style>
-  :root { --ink:#16181d; --muted:#5b6472; --rule:#e2e5ea; --bg:#fbfbfc; }
-  * { box-sizing:border-box; }
-  body { margin:0; padding:0 1.25rem 5rem; background:var(--bg); color:var(--ink);
-         font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
-  main { max-width:60rem; margin:0 auto; }
-  header { padding:2.5rem 0 1.5rem; border-bottom:2px solid var(--ink); }
-  h1 { font-size:1.9rem; margin:0 0 .35rem; letter-spacing:-.015em; }
-  .sub { color:var(--muted); font-size:.9rem; }
-  h2 { font-size:1.15rem; margin:2.5rem 0 .75rem; letter-spacing:-.01em; }
-  table { border-collapse:collapse; width:100%; font-size:.9rem; }
-  th,td { text-align:left; padding:.45rem .6rem; border-bottom:1px solid var(--rule); }
-  th { color:var(--muted); font-weight:600; }
-  .tiles { display:flex; flex-wrap:wrap; gap:.6rem; margin:1rem 0 0; }
-  .tile { flex:1 1 7rem; border:1px solid var(--rule); background:#fff; border-radius:6px; padding:.7rem .85rem; }
-  .tile b { display:block; font-size:1.5rem; line-height:1.2; }
-  .tile span { font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); }
-  .card { background:#fff; border:1px solid var(--rule); border-left:5px solid var(--rule);
-          border-radius:6px; padding:1.1rem 1.25rem; margin:.85rem 0; }
-  .card h3 { margin:0 0 .5rem; font-size:1.02rem; letter-spacing:-.005em; }
-  .meta { font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-bottom:.6rem; }
-  .badge { display:inline-block; padding:.1rem .45rem; border-radius:3px; color:#fff; font-weight:600; }
-  pre { background:#f4f5f7; border:1px solid var(--rule); border-radius:4px; padding:.65rem .8rem;
-        overflow-x:auto; font-size:.78rem; line-height:1.5; margin:.6rem 0; }
-  details { margin:.5rem 0; }
-  summary { cursor:pointer; font-size:.85rem; color:var(--muted); }
-  ul.urls { margin:.4rem 0 0; padding-left:1.1rem; font-size:.8rem; word-break:break-all; }
-  .rec { margin-top:.7rem; padding-top:.7rem; border-top:1px solid var(--rule); font-size:.93rem; }
-  .cap { font-size:.75rem; color:var(--muted); font-style:italic; margin-top:.5rem; }
-  footer { margin-top:3rem; padding-top:1.25rem; border-top:1px solid var(--rule);
-           font-size:.82rem; color:var(--muted); }
+:root{
+  --ink:#10151C; --paper:#FBFBF9; --panel:#FFFFFF;
+  --rule:#DDE1E6; --rule-soft:#ECEEF1; --muted:#5A6472;
+  --accent:#0F6E7D;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: ui-sans-serif, -apple-system, "Segoe UI Variable Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.62 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:78rem;margin:0 auto;padding:0 2rem 6rem}
+a{color:var(--accent)}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.mast{padding:4rem 0 2rem;border-bottom:3px solid var(--ink)}
+.eyebrow{font:600 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.4rem}
+h1{margin:0 0 .5rem;font-size:clamp(2.1rem,4.6vw,3.4rem);font-weight:760;letter-spacing:-.032em;line-height:1.02}
+.subject{font-size:1.05rem;color:var(--muted);margin:0 0 1.6rem}
+.origin{font-family:var(--mono);font-size:.85rem;color:var(--ink)}
+.standfirst{max-width:44rem;margin:0;font-size:1.02rem;color:var(--muted);border-left:2px solid var(--rule);padding-left:1.1rem}
+
+ul.scope{display:flex;flex-wrap:wrap;gap:0;margin:0;padding:0;list-style:none;border-bottom:1px solid var(--rule)}
+ul.scope li{flex:1 1 9rem;padding:1.25rem 1.25rem 1.25rem 0}
+ul.scope dt{font:600 10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+ul.scope dd{margin:0;font-size:1.6rem;font-weight:680;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+ul.scope dd small{display:block;font-size:.76rem;font-weight:400;color:var(--muted);letter-spacing:0;margin-top:.15rem}
+
+.matrix-sec{padding:3rem 0 0}
+h2.sec{font:600 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 .5rem}
+.sec-note{margin:0 0 1.5rem;color:var(--muted);font-size:.92rem;max-width:42rem}
+table.matrix{border-collapse:collapse;width:100%;max-width:46rem;font-variant-numeric:tabular-nums}
+table.matrix th{font:600 10px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:center;padding:.5rem .4rem}
+table.matrix th.row{text-align:left;width:9rem;padding-left:0}
+table.matrix td{text-align:center;padding:0;border:1px solid var(--rule-soft);height:3.1rem}
+table.matrix td .n{font-size:1.05rem;font-weight:680}
+table.matrix td.zero{color:#C3C8CE;background:#FCFCFB}
+table.matrix td.zero .n{font-weight:400}
+.axis-note{margin:.9rem 0 0;font-size:.8rem;color:var(--muted);max-width:42rem}
+
+.cols{display:grid;grid-template-columns:15rem 1fr;gap:3.5rem;margin-top:3.5rem;align-items:start}
+nav.index{position:sticky;top:2rem;font-size:.84rem}
+nav.index h3{font:600 10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 .8rem}
+nav.index ol{list-style:none;margin:0;padding:0}
+nav.index li{margin:0 0 .42rem;line-height:1.35}
+nav.index a{text-decoration:none;color:var(--ink);display:flex;gap:.5rem;align-items:baseline}
+nav.index a:hover{color:var(--accent)}
+nav.index .dot{width:6px;height:6px;border-radius:50%;flex:0 0 6px;margin-top:.42rem}
+
+.group{margin:0 0 3rem}
+.group-head{display:flex;align-items:baseline;gap:.75rem;border-bottom:2px solid var(--ink);padding-bottom:.5rem;margin-bottom:1.5rem}
+.group-head .label{font:700 13px/1 var(--mono);letter-spacing:.13em;text-transform:uppercase}
+.group-head .desc{font-size:.84rem;color:var(--muted)}
+.group-head .count{font:400 12px/1 var(--mono);color:var(--muted);margin-left:auto}
+
+article.finding{background:var(--panel);border:1px solid var(--rule);border-left-width:4px;padding:1.5rem 1.75rem;margin:0 0 1rem;scroll-margin-top:2rem}
+article.finding h3{margin:0 0 .7rem;font-size:1.16rem;font-weight:680;letter-spacing:-.014em;line-height:1.3}
+.tags{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:.85rem}
+.tag{font:600 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:.34rem .5rem;border:1px solid var(--rule);color:var(--muted)}
+.tag.sev{color:#fff;border-color:transparent}
+.tag.conf-high{border-color:#3F6B4F;color:#3F6B4F}
+.tag.conf-moderate{border-color:#8A6D1F;color:#8A6D1F}
+.tag.conf-low{border-color:var(--muted);color:var(--muted);font-style:italic}
+.detail{margin:0 0 1rem;color:#232A33}
+pre{font:400 12px/1.65 var(--mono);background:#F5F6F7;border:1px solid var(--rule-soft);border-left:2px solid var(--rule);padding:.85rem 1rem;overflow-x:auto;margin:0 0 1rem;white-space:pre-wrap;word-break:break-word;color:#2A313A}
+details{margin:0 0 1rem;border-top:1px solid var(--rule-soft);padding-top:.7rem}
+summary{cursor:pointer;font:600 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+summary:hover{color:var(--accent)}
+ul.urls{margin:.8rem 0 0;padding:0;list-style:none;font:400 12px/1.7 var(--mono);word-break:break-all}
+ul.urls li{padding-left:1rem;text-indent:-1rem;color:#3A424C}
+.rec{border-top:1px solid var(--rule);padding-top:.9rem}
+.rec b{font:600 10px/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:.4rem}
+.cap{margin-top:.75rem;margin-bottom:0;font-size:.78rem;color:var(--muted)}
+
+.limits{margin-top:4rem;border-top:3px solid var(--ink);padding-top:2rem}
+.limits h2{font-size:1.5rem;font-weight:720;letter-spacing:-.02em;margin:0 0 .8rem}
+.limits p,.limits ul{max-width:44rem;color:var(--muted)}
+.limits ul{padding-left:1.1rem}
+.limits li{margin-bottom:.35rem}
+footer.credit{margin-top:2.5rem;font:400 12px/1.6 var(--mono);color:var(--muted)}
+
+@media (max-width:64rem){
+  .cols{grid-template-columns:1fr;gap:2rem}
+  nav.index{position:static;border-bottom:1px solid var(--rule);padding-bottom:1rem}
+  .wrap{padding:0 1.25rem 4rem}
+}
+@media print{
+  body{background:#fff}
+  nav.index{display:none}
+  .cols{grid-template-columns:1fr}
+  article.finding{break-inside:avoid;border-color:#ccc}
+  details{display:none}
+  a{color:var(--ink);text-decoration:none}
+}
 </style>
 </head>
 <body>
-<main>
-  <header>
-    <h1>Digital acquisition audit</h1>
-    <div class="sub">${esc(config.name)} &middot; ${esc(crawl.origin)} &middot; generated ${new Date()
-      .toISOString()
-      .slice(0, 16)
-      .replace("T", " ")} UTC</div>
-    <div class="sub">Public data only. No account access, no analytics, no ad platform data.</div>
-  </header>
+<div class="wrap">
 
-  <div class="tiles">
-    ${counts
-      .map(
-        (c) =>
-          `<div class="tile" style="border-left:4px solid ${COLOR[c.severity]}"><b>${c.n}</b><span>${c.severity}</span></div>`,
-      )
-      .join("")}
-    <div class="tile"><b>${ok}</b><span>pages read</span></div>
-  </div>
+<header class="mast">
+  <p class="eyebrow">Digital acquisition audit &middot; public data only</p>
+  <h1>${esc(config.name)}</h1>
+  <p class="subject"><span class="origin">${esc(crawl.origin)}</span> &nbsp;&middot;&nbsp; generated ${generated} UTC</p>
+  <p class="standfirst">Collected from pages any visitor can load, logged out. No account access, no
+  analytics, no advertising data. Every finding is reproducible by anyone who runs the same crawl, and
+  carries how sure the tool is about it.</p>
+</header>
 
-  <h2>Scope</h2>
-  <table>
-    <tr><th>Pages crawled</th><td>${crawl.pages.length} (${ok} returned 200)</td></tr>
-    <tr><th>Sitemap URLs</th><td>${crawl.sitemapUrls.length}</td></tr>
-    <tr><th>robots.txt</th><td>${crawl.robotsTxt ? "present and respected" : "not found"}</td></tr>
-    <tr><th>Answer-engine module</th><td>${input.aeoRan ? "run" : "not run"}</td></tr>
-  </table>
+<ul class="scope">
+  <li><dt>Pages read</dt><dd>${ok}<small>of ${crawl.pages.length} crawled</small></dd></li>
+  <li><dt>Sitemap URLs</dt><dd>${crawl.sitemapUrls.length}<small>${
+    crawl.robotsTxt ? "robots.txt respected" : "no robots.txt found"
+  }</small></dd></li>
+  <li><dt>Findings</dt><dd>${findings.length}<small>${actionable.length} actionable</small></dd></li>
+  <li><dt>Answer engines</dt><dd>${input.aeoRan ? "Measured" : "&mdash;"}<small>${
+    input.aeoRan ? "share of answer sampled" : "module not run"
+  }</small></dd></li>
+</ul>
 
-  <h2>Findings</h2>
-  ${cards}
+<section class="matrix-sec">
+  <h2 class="sec">Severity against confidence</h2>
+  <p class="sec-note">Severity is a judgement about revenue impact. Confidence is how far the evidence
+  actually supports it. Reading both together is the point: a critical finding at low confidence is a
+  question, not an instruction.</p>
+  ${matrix(findings)}
+  <p class="axis-note">Confidence drops where the evidence is indirect. A tag inventory built from
+  server-rendered markup cannot see what a tag manager injects at runtime, so it is a floor rather than
+  a census, and it says so.</p>
+</section>
 
-  <footer>
-    <strong>What this cannot see.</strong> Traffic and conversion rates, Search Console query data,
-    ad spend and CPA, client-side tags fired through a tag manager, Google Business Profile insights,
-    and CRM intake outcomes all require account access. Nothing above infers any of them. Findings
-    that depend on unobservable data are marked moderate or low confidence.
-  </footer>
-</main>
+<div class="cols">
+  <nav class="index" aria-label="Findings index">
+    <h3>Findings</h3>
+    <ol>
+      ${indexItems}
+    </ol>
+  </nav>
+
+  <main>
+    ${ORDER.map((sev) => group(sev, findings.filter((f) => f.severity === sev))).join("\n")}
+
+    <section class="limits">
+      <h2>What this audit cannot see</h2>
+      <p>Everything above came from the public web. The following require account access and stay unknown
+      until then. No finding infers any of them.</p>
+      <ul>
+        <li>Traffic, sessions, and conversion rates</li>
+        <li>Query-level impressions, clicks, and position from Search Console</li>
+        <li>Spend, cost per click, cost per acquisition, and conversion volume by campaign</li>
+        <li>Tags injected client-side through a tag manager container</li>
+        <li>Business Profile insights, review volume, and listing accuracy against the real record</li>
+        <li>Which enquiries became scheduled appointments, and which became patients</li>
+      </ul>
+      <footer class="credit">digital-health-marketing &middot; github.com/Patriot7Six/Digital-Health-Marketing</footer>
+    </section>
+  </main>
+</div>
+
+</div>
 </body>
 </html>`;
 }
 
-function findingCard(f: Finding): string {
-  const urls =
-    f.urls.length > 0
-      ? `<details><summary>${f.urls.length} affected URL${f.urls.length === 1 ? "" : "s"}</summary>
-         <ul class="urls">${f.urls.slice(0, 40).map((u) => `<li>${esc(u)}</li>`).join("")}
-         ${f.urls.length > 40 ? `<li>&hellip; ${f.urls.length - 40} more</li>` : ""}</ul></details>`
-      : "";
+/** The signature view: how many findings sit at each severity and confidence. */
+function matrix(findings: Finding[]): string {
+  const rows = ORDER.map((s) => {
+    const cells = CONFIDENCE.map((c) => {
+      const n = findings.filter((f) => f.severity === s && f.confidence === c).length;
+      const style =
+        n === 0 ? "" : ` style="background:${SEV[s].tint};box-shadow:inset 3px 0 0 ${SEV[s].color}"`;
+      return `<td class="${n === 0 ? "zero" : ""}"${style}><span class="n">${n || "&middot;"}</span></td>`;
+    }).join("");
+    return `<tr><th class="row" style="color:${SEV[s].color}">${s}</th>${cells}</tr>`;
+  }).join("\n    ");
 
+  return `<table class="matrix">
+    <tr><th class="row"></th>${CONFIDENCE.map((c) => `<th>${c} confidence</th>`).join("")}</tr>
+    ${rows}
+  </table>`;
+}
+
+function group(sev: Severity, items: Finding[]): string {
+  if (items.length === 0) return "";
+  return `<section class="group">
+  <div class="group-head">
+    <span class="label" style="color:${SEV[sev].color}">${sev}</span>
+    <span class="desc">${SEV[sev].note}</span>
+    <span class="count">${items.length}</span>
+  </div>
+  ${items.map(card).join("\n  ")}
+</section>`;
+}
+
+function card(f: Finding): string {
   const evidence =
     f.evidence.length > 0
       ? `<pre>${esc(f.evidence.slice(0, 10).join("\n"))}${
-          f.evidence.length > 10 ? `\n... ${f.evidence.length - 10} more` : ""
+          f.evidence.length > 10 ? `\n&hellip; ${f.evidence.length - 10} more` : ""
         }</pre>`
       : "";
 
-  return `<div class="card" style="border-left-color:${COLOR[f.severity]}">
-  <div class="meta"><span class="badge" style="background:${COLOR[f.severity]}">${f.severity}</span>
-    &nbsp;${esc(f.module)} &middot; confidence ${esc(f.confidence)}</div>
-  <h3>${esc(f.title)}</h3>
-  <p>${esc(f.detail)}</p>
-  ${evidence}
-  ${urls}
-  <div class="rec"><strong>Recommendation.</strong> ${esc(f.recommendation)}</div>
-  ${f.capability ? `<div class="cap">Maps to: ${esc(f.capability)}</div>` : ""}
-</div>`;
+  const urls =
+    f.urls.length > 0
+      ? `<details><summary>${f.urls.length} affected URL${f.urls.length === 1 ? "" : "s"}</summary>
+    <ul class="urls">${f.urls
+      .slice(0, 40)
+      .map((u) => `<li>${esc(u)}</li>`)
+      .join("")}${f.urls.length > 40 ? `<li>&hellip; ${f.urls.length - 40} more</li>` : ""}</ul></details>`
+      : "";
+
+  return `<article class="finding" id="${esc(f.id)}" style="border-left-color:${SEV[f.severity].color}">
+    <div class="tags">
+      <span class="tag sev" style="background:${SEV[f.severity].color}">${f.severity}</span>
+      <span class="tag">${esc(f.module)}</span>
+      <span class="tag conf-${f.confidence}">${f.confidence} confidence</span>
+    </div>
+    <h3>${esc(f.title)}</h3>
+    <p class="detail">${esc(f.detail)}</p>
+    ${evidence}
+    ${urls}
+    <div class="rec"><b>What to do</b>${esc(f.recommendation)}</div>
+    ${f.capability ? `<p class="cap">Capability: ${esc(f.capability)}</p>` : ""}
+  </article>`;
 }
 
 function esc(s: string): string {

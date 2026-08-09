@@ -1,6 +1,6 @@
 # Answer engine optimization: how this is measured
 
-The posting asks for AEO strategy across ChatGPT, Perplexity, and Google AI Overviews. The problem with that ask is that none of those surfaces has a rank tracker. Answers are non-deterministic, personalised, and change without notice. So the first job is to define a metric that is honest about its own noise.
+Answer engines are increasingly where a search starts, and none of those surfaces has a rank tracker. Answers are non-deterministic, personalised, and change without notice. So the first job is to define a metric that is honest about its own noise.
 
 ## The metric: share of answer
 
@@ -16,7 +16,7 @@ For a fixed set of questions a parent would actually type, measure three things 
 
 ## The query set is the whole ballgame
 
-`config/query-set.aba-texas.json` holds 36 questions across four stages:
+`config/query-set.aba-therapy.json` holds 36 questions across four stages:
 
 - **awareness**: something is wrong, no diagnosis yet ("my 3 year old isn't talking yet")
 - **consideration**: diagnosis in hand, comparing options ("center based vs in home ABA")
@@ -53,7 +53,7 @@ In descending order of leverage, based on how retrieval-augmented answers get as
 
 ```bash
 export ANTHROPIC_API_KEY=sk-...
-npm run recon -- aeo -c config/empowerbh.json --web --limit 36
+npm run recon -- aeo -c config/my-target.local.json --web --limit 36
 ```
 
 Costs roughly one API call per query. Run weekly, keep the JSON, read the trend.

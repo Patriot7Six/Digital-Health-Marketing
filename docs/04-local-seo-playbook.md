@@ -48,7 +48,7 @@ The workable pattern is a fixed response template that thanks the reviewer, neve
 
 ## New clinic openings
 
-The posting names this explicitly. The sequence that works starts before the doors open, because a Business Profile takes time to verify and a page takes time to index.
+The sequence that works starts before the doors open, because a Business Profile takes time to verify and a page takes time to index.
 
 **T-minus 8 weeks**
 - Create the location page, live and indexable, with an "opening [month]" waitlist form
