@@ -12,7 +12,7 @@ import { auditContentGap } from "./audits/content-gap.js";
 import { runAeo, scoreAeo } from "./aeo/run.js";
 import { renderMarkdown, type ReportInput } from "./report/markdown.js";
 import { renderHtml } from "./report/html.js";
-import { anonymize } from "./anonymize.js";
+import { anonymize, findLeaks } from "./anonymize.js";
 
 const program = new Command();
 
@@ -36,6 +36,10 @@ program
   .option(
     "--anonymize [label]",
     "strip the target's name and domain from the report so it can be published as a work sample",
+  )
+  .option(
+    "--redact <terms>",
+    "comma-separated extra strings to remove when anonymising, for spellings the tool cannot infer",
   )
   .action(async (opts) => {
     const config = await loadConfig(opts.config);
@@ -94,28 +98,53 @@ program
     }
 
     let input: ReportInput = { config, crawl, findings, aeoRan };
+    let leakTokens: string[] = [];
 
     if (opts.anonymize) {
       const label =
         typeof opts.anonymize === "string" ? opts.anonymize : "Multi-location provider";
-      const scrubbed = anonymize(config, crawl, findings, { label });
+      const extra = String(opts.redact ?? "")
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+      const scrubbed = anonymize(config, crawl, findings, { label, extra });
       input = {
         config: scrubbed.config,
         crawl: scrubbed.crawl,
         findings: scrubbed.findings,
         aeoRan,
       };
-      log(`Anonymised as "${label}".`);
+      leakTokens = scrubbed.tokens;
+      log(`Anonymised as "${label}". Redacting: ${scrubbed.tokens.join(", ")}`);
     }
 
     const stamp = new Date().toISOString().slice(0, 10);
     const slug = input.config.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
+    const md = renderMarkdown(input);
+    const html = renderHtml(input);
+
+    // Verification gate. A scrubber without a check is a scrubber that fails
+    // silently, so nothing is written if the target's name survived into the
+    // rendered output.
+    if (leakTokens.length > 0) {
+      const leaks = [...findLeaks(md, leakTokens), ...findLeaks(html, leakTokens)];
+      if (leaks.length > 0) {
+        log("");
+        log("Anonymisation failed. These references survived into the report:");
+        for (const l of leaks.slice(0, 12)) log(`  ${l.replace(/\s+/g, " ")}`);
+        throw new Error(
+          "Nothing written. Add the missed spellings with --redact \"term,term\" and run again.",
+        );
+      }
+      log("Verified: no reference to the target survived into the report.");
+    }
+
     await mkdir(opts.out, { recursive: true });
     const mdPath = join(opts.out, `${slug}-${stamp}.md`);
     const htmlPath = join(opts.out, `${slug}-${stamp}.html`);
-    await writeFile(mdPath, renderMarkdown(input), "utf8");
-    await writeFile(htmlPath, renderHtml(input), "utf8");
+    await writeFile(mdPath, md, "utf8");
+    await writeFile(htmlPath, html, "utf8");
 
     if (opts.json) {
       await writeJson(opts.out, `${slug}-${stamp}-crawl.json`, input.crawl);

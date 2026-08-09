@@ -8,6 +8,7 @@ import { detectTags, extractPage } from "../src/extract.js";
 import { auditContentGap } from "../src/audits/content-gap.js";
 import { auditTechnicalSeo } from "../src/audits/technical-seo.js";
 import { collectLocations } from "../src/audits/local.js";
+import { anonymize, deriveTokens, findLeaks } from "../src/anonymize.js";
 import type { CrawlResult, QuerySet } from "../src/types.js";
 
 let pass = 0;
@@ -327,6 +328,59 @@ const dupCrawl: CrawlResult = {
   pages: [locPage, { ...locPage, url: "https://ex.com/location/nw-san-antonio-tx/" }],
 };
 check("local: redirect aliases counted once", collectLocations(dupCrawl, locConfig).length, 1);
+
+// --- anonymisation ---------------------------------------------------------
+// Regression: the first version matched configured aliases as whole strings
+// and missed a slugified finding id, a sibling staging host, and a logo
+// filename spelled the British way.
+const anonConfig = {
+  name: "Empower Behavioral Health",
+  origin: "https://www.empowerbh.com",
+  seeds: [],
+  maxPages: 10,
+  delayMs: 0,
+  concurrency: 1,
+  locationPathPrefixes: ["/location/"],
+  excludePatterns: [],
+  brandAliases: ["EmpowerBH", "Empower BH"],
+  competitors: [],
+};
+const anonCrawl: CrawlResult = {
+  origin: "https://www.empowerbh.com",
+  startedAt: "",
+  finishedAt: "",
+  robotsTxt: null,
+  robotsSitemaps: [],
+  sitemapUrls: [],
+  skipped: [],
+  pages: [],
+};
+const anonFindings = [
+  {
+    id: "seo-dup-title-aba-therapy-for-autism-in-kyle-tx-empower-bh",
+    module: "technical-seo" as const,
+    severity: "high" as const,
+    title: "2 pages sharing the title \"ABA Therapy in Kyle, TX | Empower BH\"",
+    detail: "Duplicate titles compete.",
+    evidence: [
+      "https://empowerbhstg.wpengine.com/wp-content/Empower-Behavioural-Health-Logo.png",
+    ],
+    urls: ["https://www.empowerbh.com/location/kyle-tx/"],
+    recommendation: "Write a distinct title.",
+    confidence: "high" as const,
+  },
+];
+
+const tokens = deriveTokens(anonConfig, anonCrawl);
+check("anonymize: derives distinctive tokens only", tokens.includes("empower") && tokens.includes("empowerbh"), true);
+check("anonymize: industry words are not tokens", tokens.includes("behavioral") || tokens.includes("health"), false);
+
+const scrubbed = anonymize(anonConfig, anonCrawl, anonFindings, { label: "Example provider" });
+const rendered = JSON.stringify(scrubbed.findings) + JSON.stringify(scrubbed.config);
+check("anonymize: no target reference survives", findLeaks(rendered, scrubbed.tokens), []);
+check("anonymize: slugified finding id is scrubbed", /empower/i.test(scrubbed.findings[0]?.id ?? ""), false);
+check("anonymize: finding id stays a clean slug", /^[a-z0-9-]+$/.test(scrubbed.findings[0]?.id ?? ""), true);
+check("anonymize: leak detector actually detects", findLeaks("visit empowerbh.com today", tokens).length > 0, true);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

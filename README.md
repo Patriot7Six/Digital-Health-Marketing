@@ -22,7 +22,7 @@ The design constraint is the interesting part: working only from what any visito
 git clone https://github.com/Patriot7Six/Digital-Health-Marketing.git
 cd Digital-Health-Marketing
 npm install
-npm test                                              # 33 assertions, no network
+npm test                                              # 39 assertions, no network
 
 cp config/example.target.json config/my-target.local.json
 # edit origin, name, brandAliases, competitors
@@ -38,7 +38,7 @@ export ANTHROPIC_API_KEY=sk-...
 npm run recon -- aeo -c config/my-target.local.json --web --limit 36
 ```
 
-Useful flags: `--max-pages <n>`, `--json` to dump the raw crawl and findings, and `--anonymize "Label"` to strip the target's name and domain from the output so a report can be published as a work sample.
+Useful flags: `--max-pages <n>`, `--json` to dump the raw crawl and findings, and `--anonymize "Label"` to strip the target from the output so a report can be published as a work sample. Anonymised runs are verified before anything is written: if any reference to the target survives into the rendered report, the tool prints what leaked and writes nothing. Use `--redact "term,term"` for spellings it cannot infer.
 
 Configs matching `config/*.local.json` are gitignored. Real audit targets stay out of the repo.
 
