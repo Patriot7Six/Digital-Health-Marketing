@@ -37,8 +37,17 @@ Answer-engine visibility needs an API key:
 
 ```bash
 export ANTHROPIC_API_KEY=sk-...
-npm run recon -- aeo -c config/my-target.local.json --web --limit 36
+npm run recon -- aeo -c config/my-target.local.json --web --limit 36   # writes aeo-results.json
 ```
+
+The `aeo` command writes its results as JSON. Fold them into an audit report
+without paying for the queries twice:
+
+```bash
+npm run recon -- audit -c config/my-target.local.json --aeo-results reports/aeo-results.json
+```
+
+Or run both in one pass with `audit --aeo --aeo-web`.
 
 Useful flags: `--max-pages <n>`, `--json` to dump the raw crawl and findings, and `--anonymize "Label"` to strip the target from the output so a report can be published as a work sample. Anonymised runs are verified before anything is written: if any reference to the target survives into the rendered report, the tool prints what leaked and writes nothing. Use `--redact "term,term"` for spellings it cannot infer.
 

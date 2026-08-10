@@ -10,7 +10,8 @@ import { auditTags } from "./audits/tags.js";
 import { collectLocations, auditLocal } from "./audits/local.js";
 import { auditContentGap } from "./audits/content-gap.js";
 import { runAeo, scoreAeo } from "./aeo/run.js";
-import { renderMarkdown, type ReportInput } from "./report/markdown.js";
+import type { AeoResult } from "./types.js";
+import { renderMarkdown, type ReportInput, type AeoSummary } from "./report/markdown.js";
 import { renderHtml } from "./report/html.js";
 import { anonymize, findLeaks } from "./anonymize.js";
 
@@ -32,6 +33,10 @@ program
   .option("--aeo", "also run answer-engine visibility (needs ANTHROPIC_API_KEY)", false)
   .option("--aeo-web", "let the AEO model search the live web", false)
   .option("--aeo-limit <n>", "cap the number of AEO queries", "20")
+  .option(
+    "--aeo-results <path>",
+    "fold in a previously saved aeo-results.json instead of re-running the queries",
+  )
   .option("--json", "also write the raw crawl and findings as JSON", false)
   .option(
     "--anonymize [label]",
@@ -80,6 +85,27 @@ program
     }
 
     let aeoRan = false;
+    let aeoSummary: AeoSummary | undefined;
+
+    // Reuse a previous run rather than spending the API calls again. The `aeo`
+    // subcommand writes this file; without this flag its results never reach
+    // the report and the summary reads as if the module was never run.
+    if (opts.aeoResults) {
+      const raw = await readFile(resolve(opts.aeoResults), "utf8");
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        throw new Error(`${opts.aeoResults} is not an array of AEO results.`);
+      }
+      const results = parsed as AeoResult[];
+      findings.push(...scoreAeo(results, config));
+      aeoSummary = summariseAeo(results);
+      aeoRan = true;
+      log(
+        `Folded in ${aeoSummary.queries} answer-engine results from ${opts.aeoResults} ` +
+          `(${aeoSummary.mentioned} mentioned, ${aeoSummary.cited} cited).`,
+      );
+    }
+
     if (opts.aeo) {
       if (!querySet) {
         log("! --aeo requires a querySet in the target config. Skipping.");
@@ -92,8 +118,9 @@ program
           onProgress: (d, t, q) => log(`  [${d}/${t}] ${short(q, 70)}`),
         });
         findings.push(...scoreAeo(results, config));
+        aeoSummary = summariseAeo(results);
         aeoRan = true;
-        if (opts.json) await writeJson(opts.out, "aeo-results.json", results);
+        await writeJson(opts.out, "aeo-results.json", results);
       }
     }
 
@@ -105,7 +132,7 @@ program
       f.evidence = [...new Set(f.evidence)];
     }
 
-    let input: ReportInput = { config, crawl, findings, aeoRan };
+    let input: ReportInput = { config, crawl, findings, aeoRan, aeo: aeoSummary };
     let leakTokens: string[] = [];
 
     if (opts.anonymize) {
@@ -121,6 +148,7 @@ program
         crawl: scrubbed.crawl,
         findings: scrubbed.findings,
         aeoRan,
+        aeo: aeoSummary,
       };
       leakTokens = scrubbed.tokens;
       log(`Anonymised as "${label}". Redacting: ${scrubbed.tokens.join(", ")}`);
@@ -228,6 +256,19 @@ function resolvedRelativeTo(configPath: string, target: string): string {
 async function writeJson(dir: string, name: string, data: unknown): Promise<void> {
   await mkdir(dir, { recursive: true });
   await writeFile(join(dir, name), JSON.stringify(data, null, 2), "utf8");
+}
+
+/** Headline counts from a set of AEO results, ignoring failed queries. */
+function summariseAeo(results: AeoResult[]): AeoSummary {
+  const usable = results.filter((r) => !r.error);
+  return {
+    queries: usable.length,
+    mentioned: usable.filter((r) => r.brandMentioned).length,
+    prominent: usable.filter((r) => r.brandProminent).length,
+    cited: usable.filter((r) => r.brandCited).length,
+    // Citations only exist when the model retrieved something.
+    withRetrieval: usable.some((r) => r.citations.length > 0),
+  };
 }
 
 function log(msg: string): void {

@@ -198,8 +198,14 @@ footer.credit{margin-top:2.5rem;font:400 12px/1.6 var(--mono);color:var(--muted)
     crawl.robotsTxt ? "robots.txt respected" : "no robots.txt found"
   }</small></dd></li>
   <li><dt>Findings</dt><dd>${findings.length}<small>${actionable.length} actionable</small></dd></li>
-  <li><dt>Answer engines</dt><dd>${input.aeoRan ? "Measured" : "&mdash;"}<small>${
-    input.aeoRan ? "share of answer sampled" : "module not run"
+  <li><dt>Share of answer</dt><dd>${
+    input.aeo
+      ? `${Math.round((input.aeo.mentioned / Math.max(input.aeo.queries, 1)) * 100)}%`
+      : "&mdash;"
+  }<small>${
+    input.aeo
+      ? `${input.aeo.mentioned} of ${input.aeo.queries} queries, ${input.aeo.cited} cited`
+      : "module not run"
   }</small></dd></li>
 </ul>
 

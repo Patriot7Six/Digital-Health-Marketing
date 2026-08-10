@@ -1,5 +1,15 @@
 import type { CrawlResult, Finding, Severity, TargetConfig } from "../types.js";
 
+/** Headline answer-engine numbers, when that module has been run. */
+export interface AeoSummary {
+  queries: number;
+  mentioned: number;
+  prominent: number;
+  cited: number;
+  /** True when the run used live web retrieval rather than model recall. */
+  withRetrieval: boolean;
+}
+
 const ORDER: Severity[] = ["critical", "high", "medium", "low", "info"];
 
 export interface ReportInput {
@@ -7,6 +17,7 @@ export interface ReportInput {
   crawl: CrawlResult;
   findings: Finding[];
   aeoRan: boolean;
+  aeo?: AeoSummary;
 }
 
 export function renderMarkdown(input: ReportInput): string {
@@ -31,7 +42,14 @@ export function renderMarkdown(input: ReportInput): string {
   lines.push(`| URLs in sitemap | ${crawl.sitemapUrls.length} |`);
   lines.push(`| robots.txt | ${crawl.robotsTxt ? "present" : "not found"} |`);
   lines.push(`| Skipped by robots.txt | ${crawl.skipped.filter((s) => s.reason.includes("robots")).length} |`);
-  lines.push(`| Answer-engine module | ${input.aeoRan ? "run" : "not run"} |`);
+  if (input.aeo) {
+    const pct = Math.round((input.aeo.mentioned / Math.max(input.aeo.queries, 1)) * 100);
+    lines.push(
+      `| Share of answer | ${pct}% (${input.aeo.mentioned}/${input.aeo.queries} queries, ${input.aeo.cited} cited) |`,
+    );
+  } else {
+    lines.push(`| Answer-engine module | not run |`);
+  }
   lines.push("");
 
   lines.push("## Findings by severity");
