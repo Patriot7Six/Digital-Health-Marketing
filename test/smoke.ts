@@ -427,6 +427,14 @@ check(
   tokens.includes("ebh"),
   true,
 );
+// Regression: a two-word alias yielded a two-letter token, which matched
+// inside ordinary English ("website", "collected") and made the verification
+// gate unpassable.
+check(
+  "anonymize: no token shorter than three characters",
+  tokens.filter((t) => t.length < 3),
+  [],
+);
 {
   const withInitialism = anonymize(
     anonConfig,

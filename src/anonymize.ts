@@ -152,9 +152,16 @@ export function deriveTokens(
     // filenames, and asset names. "Empower Behavioral Health" writes itself
     // "EBH", which no whole-word rule catches because it is three letters and
     // appears in none of the aliases.
-    if (words.length >= 2) {
+    //
+    // Three characters is the floor, and it is not arbitrary. A two-letter
+    // token matches inside ordinary English on every page — "eb" in "website",
+    // "ec" in "collected" — so deriving one produces a redaction pass that
+    // shreds the report and a verification gate that can never pass.
+    if (words.length >= 3) {
       const initials = words.map((w) => w[0]).join("").toLowerCase();
-      if (initials.length >= 2 && initials.length <= 5) raw.add(initials);
+      if (initials.length >= 3 && initials.length <= 5 && !GENERIC.has(initials)) {
+        raw.add(initials);
+      }
     }
   }
 
