@@ -1,6 +1,6 @@
 # Digital acquisition audit: Multi-location ABA provider
 
-Generated 2026-08-10 22:53 UTC from publicly available data only. No account access, no analytics, no ad platform data.
+Generated 2026-08-10 23:29 UTC from publicly available data only. No account access, no analytics, no ad platform data.
 
 ## Scope
 
@@ -11,17 +11,17 @@ Generated 2026-08-10 22:53 UTC from publicly available data only. No account acc
 | URLs in sitemap | 149 |
 | robots.txt | present |
 | Skipped by robots.txt | 0 |
-| Answer-engine module | not run |
+| Share of answer | 31% (11/36 queries, 13 cited) |
 
 ## Findings by severity
 
 | Severity | Count |
 |---|---|
 | critical | 1 |
-| high | 4 |
-| medium | 7 |
+| high | 5 |
+| medium | 8 |
 | low | 4 |
-| info | 4 |
+| info | 5 |
 
 ## What to fix first
 
@@ -45,7 +45,7 @@ Evidence:
 https://provider.example/location/san-antonio-tx/ - 3 clinics: northwest_san_antonio_aba_clinic, far_west_san_antonio_aba_clinic, stone_oak_aba_clinic
 https://provider.example/location/mcallen-tx/ - 2 clinics: mcallen_north_aba_clinic, mcallen_south_aba_clinic
 https://provider.example/location/corpus-christi-tx/ - 2 clinics: corpus_christi_central_aba_clinic, corpus_christi_south_aba_clinic
-https://provider.example/location/el-paso-tx/ - 4 clinics: el_paso_central_aba_clinic, el_paso_west_aba_clinic_, el_paso_east_aba_clinic, el_paso_far_east_aba_clinic
+https://provider.example/location/el-paso-tx/ - 4 clinics: el_paso_far_east_aba_clinic, el_paso_central_aba_clinic, el_paso_west_aba_clinic_, el_paso_east_aba_clinic
 ```
 
 Affected URLs (4):
@@ -100,8 +100,8 @@ ABA Therapy Clinics in Texas | Provider Behavioral Health Locations
 
 Affected URLs (2):
 
-- https://provider.example/locations-draft/
 - https://provider.example/locations/
+- https://provider.example/locations-draft/
 
 **Recommendation.** Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.
 
@@ -151,6 +151,33 @@ Affected URLs (1):
 **Recommendation.** Fix or 301 each URL, then correct the internal links pointing at it.
 
 *Maps to: Own SEO strategy and organic website performance (technical SEO, on-page optimization)*
+
+---
+
+### Absent from answers on 25 queries
+
+`aeo` · confidence: moderate
+
+Named instead, most often: Action Behavior Centers (4), Behavioral Innovations (4), BlueSprig (4), Cortica (1).
+
+Evidence:
+
+```
+My 3 year old isn't talking yet. Should I be worried about autism?
+What are the early signs of autism in toddlers?
+How do I get my child evaluated for autism in Texas?
+What is ABA therapy and does it actually work?
+Who diagnoses autism in children and how long does the wait take?
+Difference between speech therapy, occupational therapy, and ABA for autism
+Is ABA therapy controversial? What do autistic adults say about it?
+How many hours a week of ABA therapy does a child need?
+Center based vs in home ABA therapy, which is better for a young child?
+What questions should I ask an ABA provider before I enroll my child?
+```
+
+**Recommendation.** Take the decision-stage and local-stage absences first. Each one needs a page that answers the question directly, plus citations from sources the model already trusts in this category.
+
+*Maps to: Lead AI search and answer engine optimization (AEO) strategy, improving visibility across AI-powered tools*
 
 ---
 
@@ -338,6 +365,29 @@ ABA therapy centers in The Woodlands and Spring Texas
 
 ---
 
+### Share of answer: 31% (11/36 queries)
+
+`aeo` · confidence: moderate
+
+Named anywhere in the answer on 11 queries, named in the opening third on 3, and cited as a source on 13. Citation is the strongest of the three: it means the model read the site, not just recalled the brand.
+
+Evidence:
+
+```
+ABA therapy for autism near me in San Antonio Texas
+Autism therapy clinics near Stone Oak San Antonio
+ABA therapy near Lackland Air Force Base for military families
+Autism services in Kingwood or Humble Texas
+ABA therapy in McAllen or Edinburg Texas
+Servicios de terapia ABA para ninos con autismo en Brownsville Texas
+```
+
+**Recommendation.** Raise citation rate first. Answer engines quote pages that state a direct answer early, carry structured data, and are corroborated by third-party sources. Ranking in classic search remains the largest input.
+
+*Maps to: Lead AI search and answer engine optimization (AEO) strategy, improving visibility across AI-powered tools*
+
+---
+
 ## LOW
 
 ### 18 titles over 65 characters
@@ -349,8 +399,8 @@ Longer titles are truncated in results, so the closing words are not seen.
 Affected URLs (18):
 
 - https://provider.example/blog/Provider-spectacular-kids-partnership-missouri-city/
-- https://provider.example/locations-draft/
 - https://provider.example/locations/
+- https://provider.example/locations-draft/
 - https://provider.example/central-el-paso-draft/
 - https://provider.example/far-east-el-paso-draft/
 - https://provider.example/east-el-paso-draft/
@@ -550,6 +600,18 @@ Affected URLs (24):
 **Recommendation.** Check these against real ranking data in Search Console once inside, and rewrite any that rank but do not convert.
 
 *Maps to: Content direction to drive qualified traffic; AEO readiness*
+
+---
+
+### 246 distinct domains cited across the query set
+
+`aeo` · confidence: moderate
+
+provider.example (13), actionbehavior.com (13), beaminghealth.com (9), behavioral-innovations.com (9), bluesprigautism.com (9), brightpathwaysaba.com (7), blueabatherapy.com (6), ncbi.nlm.nih.gov (5), abanavigator.com (5), aparaautism.com (5), autismspeaks.org (4), magnetaba.com (4)
+
+**Recommendation.** These are the sources that shape the answer. Directory and association listings on this list are the cheapest AEO wins: correct the listing and the citation follows.
+
+*Maps to: Lead AI search and answer engine optimization (AEO) strategy, improving visibility across AI-powered tools*
 
 ---
 
