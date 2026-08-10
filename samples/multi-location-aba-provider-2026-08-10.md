@@ -1,6 +1,6 @@
 # Digital acquisition audit: Multi-location ABA provider
 
-Generated 2026-08-10 01:46 UTC from publicly available data only. No account access, no analytics, no ad platform data.
+Generated 2026-08-10 22:53 UTC from publicly available data only. No account access, no analytics, no ad platform data.
 
 ## Scope
 
@@ -45,7 +45,7 @@ Evidence:
 https://provider.example/location/san-antonio-tx/ - 3 clinics: northwest_san_antonio_aba_clinic, far_west_san_antonio_aba_clinic, stone_oak_aba_clinic
 https://provider.example/location/mcallen-tx/ - 2 clinics: mcallen_north_aba_clinic, mcallen_south_aba_clinic
 https://provider.example/location/corpus-christi-tx/ - 2 clinics: corpus_christi_central_aba_clinic, corpus_christi_south_aba_clinic
-https://provider.example/location/el-paso-tx/ - 4 clinics: el_paso_far_east_aba_clinic, el_paso_central_aba_clinic, el_paso_west_aba_clinic_, el_paso_east_aba_clinic
+https://provider.example/location/el-paso-tx/ - 4 clinics: el_paso_central_aba_clinic, el_paso_west_aba_clinic_, el_paso_east_aba_clinic, el_paso_far_east_aba_clinic
 ```
 
 Affected URLs (4):
@@ -100,8 +100,8 @@ ABA Therapy Clinics in Texas | Provider Behavioral Health Locations
 
 Affected URLs (2):
 
-- https://provider.example/locations/
 - https://provider.example/locations-draft/
+- https://provider.example/locations/
 
 **Recommendation.** Write a distinct title per page. For location pages, include the clinic's city and neighbourhood.
 
@@ -349,12 +349,12 @@ Longer titles are truncated in results, so the closing words are not seen.
 Affected URLs (18):
 
 - https://provider.example/blog/Provider-spectacular-kids-partnership-missouri-city/
-- https://provider.example/locations/
 - https://provider.example/locations-draft/
+- https://provider.example/locations/
 - https://provider.example/central-el-paso-draft/
-- https://provider.example/west-el-paso-draft/
-- https://provider.example/east-el-paso-draft/
 - https://provider.example/far-east-el-paso-draft/
+- https://provider.example/east-el-paso-draft/
+- https://provider.example/west-el-paso-draft/
 - https://provider.example/parent-resources/autism-resources-for-families-in-houston/
 - https://provider.example/parent-resources/autism-resources-for-families-in-dallas-fort-worth/
 - https://provider.example/parent-resources/autism-resources-for-families-in-el-paso/

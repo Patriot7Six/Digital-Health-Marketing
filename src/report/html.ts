@@ -29,15 +29,25 @@ export function renderHtml(input: ReportInput): string {
   const actionable = findings.filter((f) => f.severity !== "info");
   const generated = new Date().toISOString().slice(0, 16).replace("T", " ");
 
-  const indexItems = findings
-    .slice()
-    .sort((a, b) => ORDER.indexOf(a.severity) - ORDER.indexOf(b.severity))
-    .map(
-      (f) =>
-        `<li><a href="#${esc(f.id)}"><span class="dot" style="background:${
-          SEV[f.severity].color
-        }"></span><span>${esc(f.title)}</span></a></li>`,
-    )
+  const indexGroups = ORDER.map((sev) => {
+    const items = findings.filter((f) => f.severity === sev);
+    if (items.length === 0) return "";
+    const links = items
+      .map(
+        (f) =>
+          `<li><a href="#${esc(f.id)}" title="${esc(f.title)}" style="border-left-color:${
+            SEV[sev].color
+          }33">${esc(shorten(f.title, 62))}</a></li>`,
+      )
+      .join("\n          ");
+    return `<div class="grp">
+        <div class="grp-label" style="color:${SEV[sev].color}"><span>${sev}</span><span class="n">${items.length}</span></div>
+        <ol>
+          ${links}
+        </ol>
+      </div>`;
+  })
+    .filter(Boolean)
     .join("\n      ");
 
   return `<!doctype html>
@@ -89,13 +99,27 @@ table.matrix td.zero .n{font-weight:400}
 .axis-note{margin:.9rem 0 0;font-size:.8rem;color:var(--muted);max-width:42rem}
 
 .cols{display:grid;grid-template-columns:15rem 1fr;gap:3.5rem;margin-top:3.5rem;align-items:start}
-nav.index{position:sticky;top:2rem;font-size:.84rem}
-nav.index h3{font:600 10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 .8rem}
+nav.index{position:sticky;top:2rem;font-size:.8rem;max-height:calc(100vh - 4rem);overflow-y:auto;overscroll-behavior:contain}
+nav.index::-webkit-scrollbar{width:3px}
+nav.index::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
+nav.index .idx-head{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 1.1rem;padding-bottom:.55rem;border-bottom:1px solid var(--rule)}
+nav.index .idx-head h3{font:600 10px/1 var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--ink);margin:0}
+nav.index .idx-head .total{font:400 10px/1 var(--mono);color:var(--muted)}
+nav.index .grp{margin:0 0 1.25rem}
+nav.index .grp:last-child{margin-bottom:0}
+nav.index .grp-label{display:flex;align-items:center;gap:.5rem;margin:0 0 .5rem;font:700 9px/1 var(--mono);letter-spacing:.15em;text-transform:uppercase}
+nav.index .grp-label::after{content:"";flex:1;height:1px;background:currentColor;opacity:.22}
+nav.index .grp-label .n{opacity:.65;font-weight:400}
 nav.index ol{list-style:none;margin:0;padding:0}
-nav.index li{margin:0 0 .42rem;line-height:1.35}
-nav.index a{text-decoration:none;color:var(--ink);display:flex;gap:.5rem;align-items:baseline}
-nav.index a:hover{color:var(--accent)}
-nav.index .dot{width:6px;height:6px;border-radius:50%;flex:0 0 6px;margin-top:.42rem}
+nav.index li{margin:0}
+nav.index a{
+  display:block;text-decoration:none;color:#4A5462;line-height:1.42;
+  padding:.34rem 0 .34rem .75rem;border-left:2px solid transparent;
+  transition:color .12s ease,border-color .12s ease,background .12s ease;
+}
+nav.index a:hover{color:var(--ink);background:#F3F4F6}
+nav.index a.on{color:var(--ink);font-weight:560;background:#F1F3F4}
+@media (prefers-reduced-motion:reduce){nav.index a{transition:none}}
 
 .group{margin:0 0 3rem}
 .group-head{display:flex;align-items:baseline;gap:.75rem;border-bottom:2px solid var(--ink);padding-bottom:.5rem;margin-bottom:1.5rem}
@@ -130,9 +154,21 @@ ul.urls li{padding-left:1rem;text-indent:-1rem;color:#3A424C}
 footer.credit{margin-top:2.5rem;font:400 12px/1.6 var(--mono);color:var(--muted)}
 
 @media (max-width:64rem){
-  .cols{grid-template-columns:1fr;gap:2rem}
-  nav.index{position:static;border-bottom:1px solid var(--rule);padding-bottom:1rem}
+  .cols{grid-template-columns:1fr;gap:1.5rem}
   .wrap{padding:0 1.25rem 4rem}
+  /* A 20-item list above the content pushes the findings off the first
+     screen. Collapse it and let the reader open it if they want it. */
+  nav.index{position:static;max-height:none;overflow:visible;border:1px solid var(--rule);border-radius:6px;background:var(--panel)}
+  nav.index details{margin:0;border:0;padding:0}
+  nav.index summary{list-style:none;padding:.9rem 1rem;display:flex;justify-content:space-between;align-items:center}
+  nav.index summary::-webkit-details-marker{display:none}
+  nav.index summary::after{content:"\\25BE";font-size:.9rem;color:var(--muted)}
+  nav.index details[open] summary::after{content:"\\25B4"}
+  nav.index .idx-body{padding:0 1rem 1rem}
+  nav.index .idx-head{display:none}
+}
+@media (min-width:64.01rem){
+  nav.index summary{display:none}
 }
 @media print{
   body{background:#fff}
@@ -180,10 +216,13 @@ footer.credit{margin-top:2.5rem;font:400 12px/1.6 var(--mono);color:var(--muted)
 
 <div class="cols">
   <nav class="index" aria-label="Findings index">
-    <h3>Findings</h3>
-    <ol>
-      ${indexItems}
-    </ol>
+    <details open>
+      <summary><span style="font:600 10px/1 var(--mono);letter-spacing:.15em;text-transform:uppercase">Findings</span><span style="font:400 10px/1 var(--mono);color:var(--muted)">${findings.length}</span></summary>
+      <div class="idx-body">
+        <div class="idx-head"><h3>Findings</h3><span class="total">${findings.length}</span></div>
+        ${indexGroups}
+      </div>
+    </details>
   </nav>
 
   <main>
@@ -207,6 +246,46 @@ footer.credit{margin-top:2.5rem;font:400 12px/1.6 var(--mono);color:var(--muted)
 </div>
 
 </div>
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll("nav.index a"));
+  if (!links.length || !("IntersectionObserver" in window)) return;
+
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+
+  var current = null;
+  var setActive = function (a) {
+    if (a === current) return;
+    if (current) current.classList.remove("on");
+    if (a) a.classList.add("on");
+    current = a;
+  };
+
+  // Track which findings are on screen; the topmost one wins.
+  var visible = {};
+  var observer = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) visible[e.target.id] = e.boundingClientRect.top;
+        else delete visible[e.target.id];
+      });
+      var best = null;
+      var bestTop = Infinity;
+      Object.keys(visible).forEach(function (id) {
+        if (visible[id] < bestTop) { bestTop = visible[id]; best = id; }
+      });
+      if (best && byId[best]) setActive(byId[best]);
+    },
+    { rootMargin: "-10% 0px -70% 0px", threshold: 0 }
+  );
+
+  Object.keys(byId).forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+})();
+</script>
 </body>
 </html>`;
 }
@@ -271,6 +350,14 @@ function card(f: Finding): string {
     <div class="rec"><b>What to do</b>${esc(f.recommendation)}</div>
     ${f.capability ? `<p class="cap">Capability: ${esc(f.capability)}</p>` : ""}
   </article>`;
+}
+
+/** Keep index entries to one or two lines; the full text is in the title attribute. */
+function shorten(s: string, n: number): string {
+  if (s.length <= n) return s;
+  const cut = s.slice(0, n);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > n * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd() + "\u2026";
 }
 
 function esc(s: string): string {
