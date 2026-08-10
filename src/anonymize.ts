@@ -142,10 +142,19 @@ export function deriveTokens(
   const raw = new Set<string>();
 
   for (const source of [config.name, ...config.brandAliases, ...extra]) {
-    for (const word of String(source).split(/[^A-Za-z0-9]+/)) {
+    const words = String(source).split(/[^A-Za-z0-9]+/).filter(Boolean);
+    for (const word of words) {
       if (word.length >= 4 && !GENERIC.has(word.toLowerCase())) {
         raw.add(word.toLowerCase());
       }
+    }
+    // Organisations refer to themselves by initialism constantly, in slugs,
+    // filenames, and asset names. "Empower Behavioral Health" writes itself
+    // "EBH", which no whole-word rule catches because it is three letters and
+    // appears in none of the aliases.
+    if (words.length >= 2) {
+      const initials = words.map((w) => w[0]).join("").toLowerCase();
+      if (initials.length >= 2 && initials.length <= 5) raw.add(initials);
     }
   }
 

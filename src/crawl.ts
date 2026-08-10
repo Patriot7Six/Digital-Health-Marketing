@@ -63,6 +63,10 @@ export async function crawlSite(
     if (/\.(pdf|jpe?g|png|gif|webp|svg|ico|css|js|zip|mp4|woff2?|ttf|xml)$/i.test(u.pathname)) {
       return;
     }
+    // Cloudflare's email-obfuscation endpoint is emitted into markup as a
+    // link but is not a page, and returns 404 to anything that follows it.
+    // Reporting it as a broken link is a false positive.
+    if (u.pathname.startsWith("/cdn-cgi/")) return;
     if (excludeRes.some((re) => re.test(u.pathname))) {
       skipped.push({ url, reason: "excludePatterns" });
       return;

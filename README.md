@@ -24,7 +24,7 @@ The design constraint is the interesting part: working only from what any visito
 git clone https://github.com/Patriot7Six/Digital-Health-Marketing.git
 cd Digital-Health-Marketing
 npm install
-npm test                                              # 40 assertions, no network
+npm test                                              # 42 assertions, no network
 
 cp config/example.target.json config/my-target.local.json
 # edit origin, name, brandAliases, competitors

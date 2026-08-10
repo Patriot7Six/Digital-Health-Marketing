@@ -97,6 +97,14 @@ program
       }
     }
 
+    // Several audits build affected-URL lists by concatenating per-item lists,
+    // which repeats a URL that matches on more than one item. Deduping once
+    // here keeps every module from having to remember.
+    for (const f of findings) {
+      f.urls = [...new Set(f.urls)];
+      f.evidence = [...new Set(f.evidence)];
+    }
+
     let input: ReportInput = { config, crawl, findings, aeoRan };
     let leakTokens: string[] = [];
 

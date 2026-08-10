@@ -420,5 +420,33 @@ check("anonymize: leak detector actually detects", findLeaks("visit empowerbh.co
   check("technical-seo: one page is not a duplicate of itself", dupTitles.length, 0);
 }
 
+// Regression: "EBH" appeared in a slug and survived redaction, because the
+// initialism is three letters and appears in no alias.
+check(
+  "anonymize: initialism is derived and redacted",
+  tokens.includes("ebh"),
+  true,
+);
+{
+  const withInitialism = anonymize(
+    anonConfig,
+    anonCrawl,
+    [
+      {
+        ...anonFindings[0]!,
+        id: "seo-title-long",
+        urls: ["https://www.empowerbh.com/blog/ebh-spectacular-kids-partnership/"],
+        evidence: [],
+      },
+    ],
+    { label: "Example provider" },
+  );
+  check(
+    "anonymize: initialism in a slug does not survive",
+    /ebh/i.test(withInitialism.findings[0]?.urls[0] ?? ""),
+    false,
+  );
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);
